@@ -4,6 +4,8 @@ Independent research notes on a contributor fork. The Lean files and executable 
 
 **Outcome, 23 November 2026.** A sparse conjunction of binary clauses and parity equations has a projection requiring exactly $2^k-1$ affine clauses. Allow one existential helper bit and the minimum becomes $\Theta(2^{k/2})$. Both sizes are superpolynomial in the original input length for this family. The same inputs have an order that solves SAT with linearly many clauses at each stage. The bounds concern a designated projected predicate. Unrestricted polynomial-time SAT remains open. [Obstruction](obstruction.md) · [Helper bounds](helpers.md)
 
+The second cycle proves the exact five-clause optimum for three inner-product pairs with two helpers and the optimal syndrome rank for directed tour incidence. [Cycle-two results and reproduction](cycle2/README.md)
+
 ## Invariant and operation
 
 An affine clause fails on one affine flat, the simultaneous zero set of its literals. The conjunction accepts a point iff it avoids all stored flats. To eliminate $z$, carry every $z$-independent flat. Inside each other flat solve one row for $z=f_i(y)$ and XOR it into the other rows to obtain its domain $D_i(y)$. Emit the forbidden flats

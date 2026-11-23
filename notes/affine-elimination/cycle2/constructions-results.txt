@@ -1,0 +1,10 @@
+local subspaces checked: 72
+block_size 1 clauses 6 bound 4 input_bits 138 visible_points_checked 64
+block_size 2 clauses 12 bound 8 input_bits 614 visible_points_checked 4096
+block_size 3 clauses 24 bound 16 input_bits 2154 visible_points_checked 0
+block_size 6 clauses 192 bound 128 input_bits 53786 visible_points_checked 0
+global switch-map pairs 576 full visible/witness assignments 589824
+exact local volume bounds from full flat inventories 72
+middle assignments for all 30 switches and 36 label pairs 69120
+switched example size 20 rank two 16 projection-essential 20 emitted representation {'flats': 20, 'rows': 76, 'max_clause_width': 4, 'dense_encoded_bits': 1256, 'max_packed_row_bits': 15, 'max_coefficient_bits': 1}
+four-block parity-layer section assignments 114688

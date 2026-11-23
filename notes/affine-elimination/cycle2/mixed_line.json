@@ -1,0 +1,170 @@
+{
+  "rows": [
+    [
+      128,
+      256
+    ],
+    [
+      130,
+      260
+    ],
+    [
+      160,
+      272
+    ],
+    [
+      162,
+      284
+    ],
+    [
+      9,
+      226
+    ]
+  ],
+  "initial": {
+    "flats": 5,
+    "rows": 10,
+    "max_clause_width": 2,
+    "dense_encoded_bits": 117,
+    "max_packed_row_bits": 9,
+    "max_coefficient_bits": 1
+  },
+  "direct_assignments": 256,
+  "visible_assignments_by_number_of_witnesses": {
+    "0": 28,
+    "1": 12,
+    "2": 22,
+    "3": 2
+  },
+  "odd_clause_deletion_witnesses": [
+    [
+      9,
+      0
+    ],
+    [
+      9,
+      1
+    ],
+    [
+      9,
+      2
+    ],
+    [
+      9,
+      3
+    ],
+    [
+      13,
+      3
+    ]
+  ],
+  "projection_point_checks": 1024,
+  "traces": [
+    {
+      "order": [
+        6,
+        7
+      ],
+      "stages": [
+        {
+          "flats": 5,
+          "rows": 10,
+          "max_clause_width": 2,
+          "dense_encoded_bits": 117,
+          "max_packed_row_bits": 9,
+          "max_coefficient_bits": 1
+        },
+        {
+          "flats": 10,
+          "rows": 30,
+          "max_clause_width": 3,
+          "dense_encoded_bits": 334,
+          "max_packed_row_bits": 9,
+          "max_coefficient_bits": 1
+        },
+        {
+          "flats": 15,
+          "rows": 60,
+          "max_clause_width": 4,
+          "dense_encoded_bits": 631,
+          "max_packed_row_bits": 7,
+          "max_coefficient_bits": 1
+        }
+      ],
+      "operations": {
+        "rref_calls": 66,
+        "pivot_tests": 1723,
+        "row_xors": 401,
+        "input_rows_to_rref": 289,
+        "empty_flats_discarded": 24,
+        "duplicate_flats_discarded": 0,
+        "containment_tests": 108,
+        "contained_flats_discarded": 0,
+        "parallel_merges": 6,
+        "grouping_passes": 4,
+        "cylinder_flats": 0,
+        "graph_flats": 15,
+        "graph_pairs": 55,
+        "candidates_emitted": 55,
+        "candidate_rows_emitted": 255,
+        "max_candidate_width_before_rref": 5,
+        "max_rref_basis_rows": 5,
+        "max_consistent_flats_before_simplification": 21,
+        "max_consistent_rows_before_simplification": 96
+      }
+    },
+    {
+      "order": [
+        7,
+        6
+      ],
+      "stages": [
+        {
+          "flats": 5,
+          "rows": 10,
+          "max_clause_width": 2,
+          "dense_encoded_bits": 117,
+          "max_packed_row_bits": 9,
+          "max_coefficient_bits": 1
+        },
+        {
+          "flats": 7,
+          "rows": 20,
+          "max_clause_width": 3,
+          "dense_encoded_bits": 227,
+          "max_packed_row_bits": 8,
+          "max_coefficient_bits": 1
+        },
+        {
+          "flats": 9,
+          "rows": 36,
+          "max_clause_width": 4,
+          "dense_encoded_bits": 383,
+          "max_packed_row_bits": 7,
+          "max_coefficient_bits": 1
+        }
+      ],
+      "operations": {
+        "rref_calls": 32,
+        "pivot_tests": 401,
+        "row_xors": 129,
+        "input_rows_to_rref": 127,
+        "empty_flats_discarded": 12,
+        "duplicate_flats_discarded": 0,
+        "containment_tests": 6,
+        "contained_flats_discarded": 0,
+        "parallel_merges": 0,
+        "grouping_passes": 3,
+        "cylinder_flats": 1,
+        "graph_flats": 11,
+        "graph_pairs": 27,
+        "candidates_emitted": 27,
+        "candidate_rows_emitted": 117,
+        "max_candidate_width_before_rref": 5,
+        "max_rref_basis_rows": 4,
+        "max_consistent_flats_before_simplification": 9,
+        "max_consistent_rows_before_simplification": 36
+      }
+    }
+  ]
+}
