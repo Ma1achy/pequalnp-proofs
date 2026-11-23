@@ -7,7 +7,7 @@ namespace PEqualNP.Search
 
 open PEqualNP.ProofComplexity
 
-private theorem collision_formula_nonempty (l : ℕ) : (BPHP (2 ^ l + 1) l).Nonempty := by
+theorem collision_formula_nonempty (l : ℕ) : (BPHP (2 ^ l + 1) l).Nonempty := by
   have hn : 0 < 2 ^ l := by positivity
   let i : Fin (2 ^ l + 1) := ⟨0, by omega⟩
   let j : Fin (2 ^ l + 1) := ⟨1, by omega⟩

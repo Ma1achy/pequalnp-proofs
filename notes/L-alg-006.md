@@ -39,6 +39,8 @@ Consider a syntactic integer refutation of encoded size `S`. Carry a common list
 
 The last disjunction can also be reduced to a **single equation** `0 = D`. Take the product of its nonzero right-hand sides as a common multiple. Integer combinations and contraction convert the disjunction into the singleton. The bit length of `|D|` is at most `S+1`, and the full proof, including the last simplification, costs at most `20(S+1)² + 1` in the posted size measure. These transformations apply to arbitrary input formulas. Consequently, L-alg-006 is equivalent to a superpolynomial size lower bound for simplification-free derivations of such singletons from binary pigeonhole. The lower bound for these derivations remains open. [Single-unit theorem](../lean/PEqualNP/Search/SingleUnitSimplification.lean) · [Exact checker statement](L-alg-006-final-unit.lean.txt) · [Equivalence](../lean/PEqualNP/Search/BPHPFalseUnit.lean)
 
+For binary pigeonhole, the parity lower bound also restricts the value of `D`. If a simplification-free derivation of the singleton has `s` lines, `l ≥ 32` and `4s+2 ≤ exp(2^l/(32768 l²))`, then `D` is even. An odd right-hand side would stay contradictory modulo two and yield a parity refutation with at most `4s+2` lines. A nonzero even right-hand side becomes zero modulo two, so this argument leaves that case open. [False-unit parity theorem](../lean/PEqualNP/Search/BPHPFalseUnitParity.lean)
+
 ## Repeated use of a step that shortens a line
 
 For `l ≥ 17`, let `T = 2^(2^floor((l−17)/6))`. Fix a syntactic justification for each position in a refutation with `s` lines and encoded size `S`. Unfold the dependencies from a chosen occurrence of the empty line. For every natural number `M` with `4MsS < T+2`, one unary inference that shortens the list of equations appears more than `M` times in that tree. The original DAG can store this inference once. Width counts list entries, including duplicates. [Shrinking-line theorem](../lean/PEqualNP/Search/BPHPShrinkingLine.lean)
@@ -55,7 +57,8 @@ lake build +PEqualNP.Search.BPHPCubic +PEqualNP.Search.Helpers.BPHPMerge \
   +PEqualNP.Search.BPHPParityTree +PEqualNP.Search.BPHPParityCover \
   +PEqualNP.Search.Helpers.ParityMiddleSlice +PEqualNP.Search.Helpers.ParitySeparation \
   +PEqualNP.Search.BPHPReusePath +PEqualNP.Search.BPHPShrinkingLine \
-  +PEqualNP.Search.BPHPFalseUnit +PEqualNP.Search.SingleUnitSimplification
+  +PEqualNP.Search.BPHPFalseUnit +PEqualNP.Search.BPHPFalseUnitParity \
+  +PEqualNP.Search.SingleUnitSimplification
 ```
 
 From the checkout root, the project's checker can also verify both normalization theorems against their recorded statements.
