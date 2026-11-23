@@ -1,0 +1,78 @@
+# Exact projection by affine boundary rank
+
+Given a variable order, the algorithm below decides a conjunction of affine clauses in time $O(2^r S^5)$ bit operations. Here $r$ is a rank computed from the input rows along that order and $S=1+n+m+L$, where $m$ counts the input clauses and $L$ counts their literal occurrences. The exponent five is a conservative bound. A 256-coordinate boundary can have rank two. A single wide ordinary clause can also force the full table to have exponentially many entries. This is a restricted result.
+
+## Common input and pointwise elimination
+
+An affine literal on $x\in\mathbb F_2^n$ is a bit $a\cdot x+c$. It is false on $a\cdot x=c$. A disjunction of $k$ literals therefore forbids exactly the affine flat specified by their $k$ simultaneous falsifying equations. A conjunction accepts the complement of the union of its forbidden flats. An inconsistent system forbids the empty set. The empty equation list forbids every assignment. The stored bit row is $(a\ll1)\mathbin{|}c$. An ordinary CNF uses coordinate rows. An affine equality $a\cdot x=d$ is a unit clause whose falsifying row has right side $1+d$.
+
+Let $z$ be the next bit. A system without a $z$-coefficient is a cylinder and its constraint passes through. In a system with a $z$-coefficient, select one such row, solve it as $z=f_i(y)$, and XOR it into every other row containing $z$. The remaining rows give a domain $D_i(y)$. Flat $i$ forbids precisely this value of $z$ on this domain. Thus the projected forbidden set is the union of the carried forbidden cylinders and the flats
+$$
+ D_i\cap D_j\cap\{y:f_i(y)+f_j(y)=1\},\qquad i<j .
+$$
+Indeed, away from forbidden cylinders, projection fails exactly where the graphs together forbid both bits. A witness to failure consists of two active graphs with opposite values. This reasoning handles any number of $z$-dependent literals inside one clause. Intersections and the disagreement condition are affine systems.
+
+For the exercise $a\lor(z+b)$, the forbidden graph has $D=\{a=0\}$ and $z=b$. Two such clauses project to $a\lor c\lor\neg(b+d)$. For any number of clauses $a_i\lor(z+b_i)$, carry independent constraints and conjoin $a_i\lor a_j\lor\neg(b_i+b_j)$ over all distinct pairs. Empty and singleton lists of pairs contribute true. These identities also hold for non-affine $a_i,b_i$ independent of $z$, although the domain or disagreement test can then fall outside the flat representation.
+
+The explicit-cover algorithm represents and simplifies the pair flats. The algorithm below stores the entire projected *touched* part as a truth table on a basis of linear forms. Converting a false table entry back into a forbidden flat requires one simultaneous equation per independent basis row. Expanding all entries is unnecessary.
+
+## A rank bound for the table algorithm
+
+Fix a supplied permutation $v_1,\dots,v_n$. Write $E_i=\{v_1,\dots,v_i\}$, $Y_i=V\setminus E_i$. The support of an original flat is the union of the supports of all its coefficient rows. Let $T_i$ contain every original flat whose support intersects $E_i$, together with *all* constant flats at every stage, including step zero. Let $G_j$ be the predicate that avoids flat $j$. Define
+$$
+  P_i(y)=\exists x_{E_i}\ \bigwedge_{j\in T_i}G_j(x_{E_i},y),\qquad
+  R_i(y)=P_i(y)\land\bigwedge_{j\notin T_i}G_j(y).
+$$
+The untouched factors are independent of all eliminated bits. Hence $R_i(y)$ equals the projection of the entire input at each suffix assignment.
+
+Define $U_i$ as the row span of the coefficient vectors of all original flats in $T_i$, restricted to $Y_i$. Width is $r=\max_i\dim U_i$. With any basis matrix $B_i$ of this space, there is a Boolean table $A_i$ such that $P_i(y)=A_i[B_i y]$. If $B_i y=B_i y'$, each touched input row has the same residual value at $y,y'$. For every fixed choice of the eliminated variables the conjunction has the same truth value. Existential projection preserves that equality. Basis independence gives a surjection $y\mapsto B_i y$, so every index corresponds to an actual suffix. The syntactic coordinate boundary is the union of the suffix supports of the touched rows. Its size is an upper bound on the rank. The union of supports of any basis of $U_i$ gives the same coordinate boundary, since each span contains the other's generators.
+
+To implement the transition from $i$ to $i+1$, put $z=v_{i+1}$ and place $J=T_{i+1}\setminus T_i$ in its input bucket. All variables of factors in $J$ belong to $\{z\}\cup Y_{i+1}$. Restrict the rows of $B_i$ and all coefficient rows of $J$ to $Y_{i+1}$, choose an echelon basis $B_{i+1}$ for their span, and write each restricted row in basis coordinates. This span equals $U_{i+1}$ because restriction is linear and the previous basis spans all previous restricted input rows.
+
+For $t=B_{i+1}y$ and $z=b$, a row with deleted coefficient $e$ and new basis coordinates $h$ evaluates to $eb+h\cdot t$. Apply this rule to every previous basis row to obtain the old index $p(b,t)$, and to the new factors to obtain $G_j(b,t)$, comparing each equation with its constant term. Set
+$$
+ A_{i+1}[t]=\bigvee_{b\in\{0,1\}}\Big(A_i[p(b,t)]\land\bigwedge_{j\in J}G_j(b,t)\Big).
+$$
+The newly introduced factors do not depend on $E_i$, so substituting the induction invariant in this expression proves the desired transition pointwise. $A_0$ is one bit testing constant factors. At $i=n$ every factor is touched, the basis is empty, and $A_n[0]$ decides SAT. All witnesses have been eliminated.
+
+### Input model and bounds
+
+The implementation accepts dense bit rows and an explicit order, with fixed variable IDs $0,\dots,n-1$. Counting all declared variables in $S$ matters when a header can name an enormous unused range. For an encoded SAT instance of length $N$, discard unused variable names and renumber the occurring names before a dense expansion. This can be done by sorting the occurrence list and joining indices, in deterministic polynomial bit time. Arbitrary Boolean formulas over a fixed bounded-fanin basis have the usual local gate encoding. Introduce a bit $g$ per internal gate, add one clause excluding each invalid constant-size input/output row of its truth table, and assert the root bit. Given original inputs, the unique consistent gate values are obtained in evaluation order. Thus $F(x)\leftrightarrow\exists g\ H(x,g)$. The algorithm then projects the extended conjunction $H$ over its declared order. With a fixed gate basis, $n,m,L=O(N)$ after renumbering and gate encoding. Ordinary CNF input can be used directly. The potentially larger $r$ of a particular encoding and order remains part of the bound.
+
+In a dense encoding with $n+1$ bits per affine row, explicit order or renumbered occurring variables, $S=O(N+1)$ for the encoded affine-clause input as well. For the ordinary SAT conversion, dense masks may occupy $O((N+1)^2)$ bits, still polynomial in the original length. For a compact header with no rows and no explicit variable list, a pre-parser can decide the constant formula without initializing an array of the declared size. The Python API takes an already chosen, explicit variable universe and its bit rows. File-format parsing and gate encoding above describe the mathematical preprocessing.
+
+- There are $n+1$ layers. Bucketing scans each flat's rows and at most $n$ order positions. Echelon insertion and coordinates process at most $n+L$ rows per step. Each row needs $O(n+1)$ pivot reductions, shifts, scans or XORs of $O(n+1)$-bit masks. Pivots have at most $n$ distinct indices. List lookup by scanning the existing pivots also suffices with an extra $O(S)$ factor.
+- Each new table has $2^{r_{i+1}}$ entries. A branch computes at most $n+L$ dot products and compares at most $L$ affine rows, plus $O(m)$ factor control operations. The stored coefficient bits are in $\{0,1\}$. Packed masks have at most $n+1$ bits. Each dot product is bitwise AND and parity in $O(n+1)$ bit operations, with conservative extra factors of $O(S)$ for counters, addressing and loop control. Indexing the old table in a logarithmic-cost random-access model uses $O(r+\log(S+1))=O(S)$ address bits. The old and new arrays coexist during one step.
+- In a sequential bit model one may replace each random lookup by an offline join. Write at most $2^{r_{i+1}+1}$ records $(p,t)$, one for each branch whose new factors pass. Merge-sort by $p$, scan the old table once and retain records with a true old entry, then merge-sort the retained $t$'s and write the next table by scanning all possible $t$ in order. Duplicate witnesses produce the same true bit. Both sorts use $O(r+1)$ merge passes on $O(S)$-bit records. Sequential access therefore also takes $2^r\operatorname{poly}(S)$ bit operations, without treating a scan to a random index as a free lookup. The Python implementation uses direct array lookup.
+- These estimates give the conservative uniform $O(2^r S^5)$ bit-time bound above, including basis construction and all transitions, and $O(S^3+2^r S)$ bits of working storage, including the sequential variant's records. The implementation's decision entry point retains a constant number of layer tables. Storing a complete trace is optional. Table arrays in Python use a byte per truth value. The reported logical state size charges one bit per table entry, dense basis masks, the gamma-coded rank and the carried original flats. The table-height bound measures all intermediate layers in the supplied order. The bounds assume the order is supplied.
+- A promised $r\le c\log_2(N+2)$, for a fixed $c$ and the supplied order, yields polynomial time in $N$. No such bound holds on all inputs. At the current transition, evaluating an arbitrary function on $r$ Boolean coordinates by enumerating its whole table already costs $\Omega(2^r)$ for this procedure.
+
+## Explicit separation examples and evidence
+
+For $k\ge2$, partition $y_1,\ldots,y_k$ into two nonempty blocks of alternating indices. Let $P,Q$ be their respective parity bits. With $z$ first, $(z\lor P)\land(\neg z\lor Q)$ projects to $P\lor Q$. At the first cut all $k$ coordinates occur, yet only the two independent forms $P,Q$ occur on the suffix. Subsequent cuts restrict those same rows, so the maximum rank is two. At $k=256$ the dense input has 1,058 bits and the largest syndrome table has four entries. This compares *full-table sizes* of coordinate and linear indices under the given order.
+
+In the opposite direction, take $(z\lor y_1\lor\cdots\lor y_k)\land\neg z$, again with $z$ first. The first input flat carries all $k$ restricted coordinate equations. Hence $r_1=k$, and the implementation materializes $2^k$ entries at that cut, although only the all-zero suffix is forbidden. Hand substitution gives the residual as one clause. At $k=16$ the dense input has 348 bits and the largest table has 65,536 entries. The dense input length for this family is $O(k^2)$, so the table grows superpolynomially even in the charged dense encoding length. Binary alphabet coefficients have constant individual bit cost throughout both families.
+
+To reproduce the checks, run the following command from this directory.
+
+```sh
+python3 syndrome_checks.py > syndrome-results.json
+```
+
+The checks enumerate all subsets of the twelve distinct affine flats of the two-bit plane (including the empty set), in both orders. This gives 8,192 instance/order pairs. Another 400 seeded cases, including empty systems, repeated and inconsistent rows, use up to six variables. An independent assignment enumerator checks both the touched table and the full residual at every suffix point for every prefix, including the smaller separation examples. There are 74,403 such checks. The JSON records the seed, dense input and logical state sizes, maximum equivalent forbidden width, basis/row bit lengths, per-prefix table sizes and operation counts. Counts are algorithm events rather than a timing proxy.
+
+## Relation to the number of explicit forbidden flats
+
+A table with rank $s$ needs at most $2^s$ truth bits. The explicit cover can contain flats having many different directions in the same quotient. For $s=\dim U_i$, the number of **nonempty** affine flats on the quotient space is
+$$
+ A(s)=\sum_{j=0}^s {s\brack j}_2\,2^j .
+$$
+Indeed a codimension-$j$ normal space is one of the Gaussian-binomial-number many $j$-subspaces, and independent equation rows have $2^j$ attainable right sides. A coarser bound $A(s)\le 2^{s(s+1)}$ follows by padding a canonical list of up to $s$ augmented rows with zeros. Fiber preimages of these flats are precisely the nonempty flats with normal space contained in $U_i$.
+
+For the RREF, containment-removal, and parallel-pair merging cover algorithm, at most $m+A(r_i)$ flats survive at layer $i$ after deduplication. To see this, mark as used every output of a graph pair, and every parallel merge with a used parent. Carried flats keep their marks. Among unused flats, ancestral sets of original flat occurrences can be kept disjoint. They start disjoint, merging two unused flats consumes both and unites their ancestor sets, and deletion simply removes a set. A used output may refer to the same ancestor in many places. This does not affect the count of unused flats. An unused flat's linear normal space is contained in that of *each* original ancestor, considering full-width rows padded by zeroes on eliminated variables. This follows because a parallel merge only shrinks the common normal space.
+
+Inductively every used flat at cut $i$ has normal space in $U_i$. For an unused graph selected during the next step, some normal has a nonzero $z$ coefficient. Every original ancestor then has a row involving $z$, hence belongs to $T_{i+1}$. All restricted graph normals belong to $U_{i+1}$. Previously used flats have the same property by restriction from $U_i$. The graph-pair output forms only linear combinations of those restricted normals. A cylinder carried forward retains its inclusion, and a parallel merge involving a used flat takes a subspace of that parent's normal space. Deleting contained or duplicate flats introduces no new rows. This proves the induction. Distinct used flats among the normalized survivors give at most $A(r_i)$ possible quotient flats, and there are at most $m$ unused survivors. This is an upper bound on the cover after normalization. Materializing pair candidates and simplifying them still incurs the pair and normalization costs of that implementation.
+
+Combining the survivor bound with the explicit per-step cost yields a complete fixed-order complexity bound for the **same pairwise cover solver**. Put $M=m+2^{r(r+1)}$. Each step starts with at most $M$ normalized flats and produces at most $1+M+{M\choose 2}$ candidates. The polynomial-in-current-size costs for row reduction, pair enumeration, containment and repeated parallel merges are given in [the solver analysis](experiments.md). There are at most $n$ steps, and the log of the maximum candidate count is $O(\log(m+2)+(r+1)^2)$. Thus all work, intermediate storage and the final decision fit $2^{O((r+1)^2)}\operatorname{poly}(N+1)$ bit cost on renumbered input, including initialization. In particular this solver runs in polynomial time on supplied orders satisfying $r=O(\sqrt{\log(N+2)})$ with a fixed implied constant. The tighter single-exponential rank bound above uses the syndrome table.
+
+The next question is whether a tractable exact hybrid step can detect a small affine-flat cover before forming a large syndrome table, while retaining a proved bound across every subsequent cut of the supplied order. The two explicit families show why having a compact residual on a given example does not by itself produce that algorithm.
