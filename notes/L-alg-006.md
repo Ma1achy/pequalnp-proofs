@@ -23,6 +23,16 @@ For bit width at least 32, the existing parity lower bound implies that if `4sr(
 
 One inexpensive integer equation can already require an exponential parity tree. For `k ≥ 4`, testing whether exactly `k` of `2k` bits are true needs more than `2^k/k` leaves. Thus the tree bound cannot establish superpolynomial integer proof size by charging a line for the leaves it requires. [Middle-slice theorem](../lean/PEqualNP/Search/Helpers/ParityMiddleSlice.lean)
 
+## Reuse on paths to the contradiction
+
+Fix an occurrence of the empty line in a refutation with `s` lines. Keep only dependencies reachable from that occurrence and count references in that part of the proof. For bit width `l ≥ 17`, some dependency path starting at the empty line visits `k` multiply referenced positions with
+
+```text
+2^(2^floor((l−17)/6)) ≤ 2s (2s+1)^k.
+```
+
+If the same position supplies both premises to a resolution, those are two references. The ordered path visits a position at most once. For any polynomial line budget in the number of holes and any polynomial path-reuse budget in the bit width, arbitrarily large widths exceed at least one budget. In particular, an unrestricted polynomial-size proof family would need deep sharing on a single path. The proof unfolds the indexed DAG and applies the tree lower bound, pruning unused lines before it counts references. [Reuse theorem](../lean/PEqualNP/Search/BPHPReusePath.lean) · [Tree bound](../lean/PEqualNP/Search/Helpers/BPHPTreeRate.lean)
+
 With the pinned Lean toolchain and the Mathlib cache installed, run these commands from the checkout.
 
 ```sh
@@ -31,5 +41,6 @@ lake build +PEqualNP.Search.BPHPCubic +PEqualNP.Search.Helpers.BPHPMerge \
   +PEqualNP.Search.BPHPSemanticWidth +PEqualNP.Search.BPHPParityBarrier \
   +PEqualNP.Search.BPHPPigeonSupport +PEqualNP.Search.BPHPModularReduction \
   +PEqualNP.Search.BPHPParityTree +PEqualNP.Search.BPHPParityCover \
-  +PEqualNP.Search.Helpers.ParityMiddleSlice +PEqualNP.Search.Helpers.ParitySeparation
+  +PEqualNP.Search.Helpers.ParityMiddleSlice +PEqualNP.Search.Helpers.ParitySeparation \
+  +PEqualNP.Search.BPHPReusePath
 ```
