@@ -33,6 +33,18 @@ Fix an occurrence of the empty line in a refutation with `s` lines. Keep only de
 
 If the same position supplies both premises to a resolution, those are two references. The ordered path visits a position at most once. For any polynomial line budget in the number of holes and any polynomial path-reuse budget in the bit width, arbitrarily large widths exceed at least one budget. In particular, an unrestricted polynomial-size proof family would need deep sharing on a single path. The proof unfolds the indexed DAG and applies the tree lower bound, pruning unused lines before it counts references. [Reuse theorem](../lean/PEqualNP/Search/BPHPReusePath.lean) · [Tree bound](../lean/PEqualNP/Search/Helpers/BPHPTreeRate.lean)
 
+## A single final simplification
+
+Consider a syntactic integer refutation of encoded size `S`. Carry a common list of its false constant equations through the proof. Resolution makes two copies of the common list, and syntactic weakening contracts them to one. The resulting proof reaches a disjunction of false constants using no simplification, at a cost of at most `6S²`. A single simplification then derives the empty line. [Proof](../lean/PEqualNP/Search/DeferredSimplification.lean) · [Exact checker statement](L-alg-006-final-step.lean.txt)
+
+The last disjunction can also be reduced to a **single equation** `0 = D`. Take the product of its nonzero right-hand sides as a common multiple. Integer combinations and contraction convert the disjunction into the singleton. The bit length of `|D|` is at most `S+1`, and the full proof, including the last simplification, costs at most `20(S+1)² + 1` in the posted size measure. These transformations apply to arbitrary input formulas. Consequently, L-alg-006 is equivalent to a superpolynomial size lower bound for simplification-free derivations of such singletons from binary pigeonhole. The lower bound for these derivations remains open. [Single-unit theorem](../lean/PEqualNP/Search/SingleUnitSimplification.lean) · [Exact checker statement](L-alg-006-final-unit.lean.txt) · [Equivalence](../lean/PEqualNP/Search/BPHPFalseUnit.lean)
+
+## Repeated use of a step that shortens a line
+
+For `l ≥ 17`, let `T = 2^(2^floor((l−17)/6))`. Fix a syntactic justification for each position in a refutation with `s` lines and encoded size `S`. Unfold the dependencies from a chosen occurrence of the empty line. For every natural number `M` with `4MsS < T+2`, one unary inference that shortens the list of equations appears more than `M` times in that tree. The original DAG can store this inference once. Width counts list entries, including duplicates. [Shrinking-line theorem](../lean/PEqualNP/Search/BPHPShrinkingLine.lean)
+
+The same bound applies inside a simplification-free derivation of a false singleton, with `s` and `S` measured in that derivation. Here the repeatedly copied inference is a weakening that preserves every distinct equation in its premise and shortens the list. It must therefore remove duplicate occurrences. The proof charges the input leaves in the unfolded tree to local width losses and counts the copies contributed by each position in the original proof. [Repeated contraction](../lean/PEqualNP/Search/BPHPShrinkingLine.lean) · [Counting copies](../lean/PEqualNP/Search/Helpers/DagCopies.lean)
+
 With the pinned Lean toolchain and the Mathlib cache installed, run these commands from the checkout.
 
 ```sh
@@ -42,5 +54,15 @@ lake build +PEqualNP.Search.BPHPCubic +PEqualNP.Search.Helpers.BPHPMerge \
   +PEqualNP.Search.BPHPPigeonSupport +PEqualNP.Search.BPHPModularReduction \
   +PEqualNP.Search.BPHPParityTree +PEqualNP.Search.BPHPParityCover \
   +PEqualNP.Search.Helpers.ParityMiddleSlice +PEqualNP.Search.Helpers.ParitySeparation \
-  +PEqualNP.Search.BPHPReusePath
+  +PEqualNP.Search.BPHPReusePath +PEqualNP.Search.BPHPShrinkingLine \
+  +PEqualNP.Search.BPHPFalseUnit +PEqualNP.Search.SingleUnitSimplification
+```
+
+From the checkout root, the project's checker can also verify both normalization theorems against their recorded statements.
+
+```sh
+node tools/check-lean.mjs lean/PEqualNP/Search/DeferredSimplification.lean \
+  notes/L-alg-006-final-step.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/SingleUnitSimplification.lean \
+  notes/L-alg-006-final-unit.lean.txt check
 ```

@@ -27,16 +27,24 @@ private theorem eq_of_same_axiom_line {C D : Clause V} {L : QLine V}
     simp [litQEq_injective.eq_iff]
   rw [← encode C, ← hC, hD, encode D]
 
-variable [Fintype V]
-
-private theorem card_le_axiom_cost {C : Clause V} {L : QLine V}
-    (h : ∀ e, e ∈ L ↔ ∃ t ∈ C, e = litQEq t) :
-    C.card ≤ (L.map QEq.size).sum := by
+/-- Each distinct literal of an input clause occupies at least one position in its axiom line. -/
+theorem card_le_axiom_length {C : Clause V} {L : QLine V}
+    (h : ∀ e, e ∈ L ↔ ∃ t ∈ C, e = litQEq t) : C.card ≤ L.length := by
   classical
   have him : C.image litQEq ⊆ L.toFinset := by
     intro e he
     obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp he
     exact List.mem_toFinset.mpr ((h _).mpr ⟨t, ht, rfl⟩)
+  calc
+    C.card = (C.image litQEq).card := (Finset.card_image_of_injective _ litQEq_injective).symm
+    _ ≤ L.toFinset.card := Finset.card_le_card him
+    _ ≤ L.length := List.toFinset_card_le L
+
+variable [Fintype V]
+
+private theorem card_le_axiom_cost {C : Clause V} {L : QLine V}
+    (h : ∀ e, e ∈ L ↔ ∃ t ∈ C, e = litQEq t) :
+    C.card ≤ (L.map QEq.size).sum := by
   have length_le_cost (K : QLine V) : K.length ≤ (K.map QEq.size).sum := by
     induction K with
     | nil => simp
@@ -44,11 +52,7 @@ private theorem card_le_axiom_cost {C : Clause V} {L : QLine V}
       have he : 1 ≤ QEq.size e := by unfold QEq.size; omega
       simp only [List.length_cons, List.map_cons, List.sum_cons]
       omega
-  calc
-    C.card = (C.image litQEq).card := (Finset.card_image_of_injective _ litQEq_injective).symm
-    _ ≤ L.toFinset.card := Finset.card_le_card him
-    _ ≤ L.length := List.toFinset_card_le L
-    _ ≤ _ := length_le_cost L
+  exact (card_le_axiom_length h).trans (length_le_cost L)
 
 /-- Each distinct represented input clause contributes a line and at least one unit per
 literal, even when the proof repeats equations, changes their order, or reuses lines. -/

@@ -46,6 +46,16 @@ private theorem collisionLiterals_card {m l : ℕ} (p : Finset (Fin m) × (Fin l
   rw [Finset.card_image_of_injective _ (fun _ _ h => congrArg Prod.fst h)]
   simp [Finset.card_product]
 
+/-- Every axiom line representing a bit-PHP collision contains at least two literals per bit. -/
+theorem bphp_axiom_length {N l : ℕ} {C : PEqualNP.ProofComplexity.Clause (Fin N × Fin l)}
+    {L : QLine (Fin N × Fin l)} (hc : C ∈ BPHP N l)
+    (rep : ∀ e, e ∈ L ↔ ∃ lit ∈ C, e = litQEq lit) : 2 * l ≤ L.length := by
+  obtain ⟨i, j, α, hij, rfl⟩ := hc
+  have hh := card_le_axiom_length rep
+  change (bax i j α).card ≤ L.length at hh
+  rw [← collisionLiterals_pair, collisionLiterals_card] at hh
+  simpa [hij] using hh
+
 private theorem collisionLiterals_inj {m l : ℕ} (hl : 0 < l)
     {p q : Finset (Fin m) × (Fin l → Bool)} (hp : p.1.Nonempty)
     (h : collisionLiterals p = collisionLiterals q) : p = q := by
