@@ -1,6 +1,22 @@
 # Partial results on L-alg-006
 
-The posted conjecture asks whether every polynomial is exceeded by the size of a dag-like syntactic integer R(lin) refutation of binary pigeonhole for some bit width. Write `n = 2^l` for the number of holes. The full conjecture remains open in this work. [Posted statement](https://pequalnp.com/lemma#L-alg-006)
+Write `n = 2^l` for the number of holes. The posted conjecture asks whether, for every polynomial `p`, there is a bit width `l` at which every DAG-like syntactic integer R(lin) refutation of binary pigeonhole has encoded size greater than `p(n)`. The full conjecture remains open in this work. [Posted statement](https://pequalnp.com/lemma#L-alg-006)
+
+## One equation must be hard to evaluate by parity queries
+
+Fix any polynomial line budget `p(n)`. At arbitrarily large bit widths of the form `l = 2^t`, every refutation within that budget contains an equation for which every correct adaptive parity-query algorithm needs **more than `floor(l/(2(t+5)))` queries** in the worst case. The same equation occurs as the result of an integer linear combination and as an operand of a resolution step. The theorem identifies each occurrence together with its earlier premises. Querying its nonzero variable coefficients directly gives an evaluator, so the equation must also use more than this many variables. The lower bound concerns one equation inside a proof whose disjunctions and DAG reuse are unrestricted. [Growing depth bound](../lean/PEqualNP/Search/BPHPActiveDepthWitnesses.lean) · [Support bound](../lean/PEqualNP/Search/BPHPGrowingSupport.lean)
+
+The proof compiles each equation independently into a disjunction of terms, one per accepting leaf of its decision tree. A term for a path of depth `k` contains at most `k` parity equations. Case analysis on the result and one operand simulates a binary integer inference without branching on the rest of either disjunction. For `k ≥ 1`, an `s`-line proof whose individual equations all admit depth `k` gives a Res(k,⊕) proof of at most `(4(k+1)+2·2^k+2)·2^k·s+1` lines. The project's lower bound for Res(k,⊕) then rules out polynomial-length proofs for each fixed `k`. An equation can have large query depth and small integer encoding, so this still leaves the unrestricted lower bound open. [Simulation](../lean/PEqualNP/Search/QEquationSimulation.lean) · [Adaptive depth](../lean/PEqualNP/Search/BPHPEquationDecisionDepth.lean) · [Parity proof lower bound](../lean/PEqualNP/ProofComplexity/L061.lean)
+
+## Two targets for constructing a short proof
+
+In the **balanced** instance there are `n` pigeons and `n` holes. The collision clauses force their binary labels to form a permutation of `0,…,n−1`, so their sum is `n(n−1)/2`. If there is an integer derivation of that single sum equation of encoded size `S`, there is a refutation with `n+1` pigeons of size at most **`2S+403(n+1)^6`**. Take two copies of the derivation, omitting a different pigeon from each. Subtracting the sums says the omitted pigeons have equal labels. Branching on just their `2l` bits yields the empty line using the original collision clauses. The semantic sum identity and the proof conversion are verified. The size of a derivation of the identity is open. [Permutation-sum theorem](../lean/PEqualNP/Search/PermutationSumRefutation.lean) · [Exact checker statement](L-alg-006-permutation-sum.lean.txt)
+
+For the instance with `n+1` pigeons, write one disjunction `G` containing the integer equation “the binary labels of rows `i` and `j` are equal” for every ordered pair `i ≠ j`. This line is true under every Boolean assignment. L-alg-006 holds exactly when, for every polynomial `p`, there is a **positive** bit width at which every derivation of `G` **from the Boolean axioms alone**, using the same integer inference rules, has encoded size greater than `p(n)`. A single polynomial bounding the sizes of such derivations at every positive width would refute the conjecture. [Equivalence](../lean/PEqualNP/Search/CollisionTautologyEquivalence.lean)
+
+At positive bit width, a pigeonhole refutation of encoded size `S` yields a derivation of `G` of size at most **`64000 S³`**. Conversely, a derivation of `G` of size `T` yields a refutation of size at most **`3300 T⁴`**. [From a refutation to the collision statement](../lean/PEqualNP/Search/BPHPCollisionTautology.lean) · [From the collision statement to a refutation](../lean/PEqualNP/Search/BPHPCollisionCost.lean)
+
+## Earlier lower bounds
 
 | Lean result | Bound |
 |---|---|
@@ -70,7 +86,9 @@ lake build +PEqualNP.Search.BPHPCubic +PEqualNP.Search.Helpers.BPHPMerge \
   +PEqualNP.Search.BPHPFalseUnit +PEqualNP.Search.BPHPFalseUnitParity \
   +PEqualNP.Search.SingleUnitSimplification +PEqualNP.Search.BPHPPrimitiveMinor \
   +PEqualNP.Search.PrimitiveCancellationExample +PEqualNP.Search.BPHPCancellationWitnesses \
-  +PEqualNP.Search.BPHPCancellationMultiplicity
+  +PEqualNP.Search.BPHPCancellationMultiplicity +PEqualNP.Search.BPHPActiveDepthWitnesses \
+  +PEqualNP.Search.PermutationSumRefutation +PEqualNP.Search.CollisionTautologyEquivalence \
+  +PEqualNP.Search.BPHPCollisionCost
 ```
 
 From the checkout root, the project's checker can verify the following theorems against their recorded statements.
@@ -84,4 +102,14 @@ node tools/check-lean.mjs lean/PEqualNP/Search/BPHPPrimitiveMinor.lean \
   notes/L-alg-006-parity-minor.lean.txt check
 node tools/check-lean.mjs lean/PEqualNP/Search/BPHPCancellationWitnesses.lean \
   notes/L-alg-006-cancellation-witnesses.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BPHPEquationSupport.lean \
+  notes/L-alg-006-equation-support.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BPHPEquationDecisionDepth.lean \
+  notes/L-alg-006-equation-decision-depth.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BPHPActiveDepthWitnesses.lean \
+  notes/L-alg-006-active-depth.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/PermutationSumRefutation.lean \
+  notes/L-alg-006-permutation-sum.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/CollisionTautologyEquivalence.lean \
+  notes/L-alg-006-collision-equivalence.lean.txt check
 ```
