@@ -2,6 +2,10 @@
 
 Write `n = 2^l` for the number of holes. The posted conjecture asks whether, for every polynomial `p`, there is a bit width `l` at which every DAG-like syntactic integer R(lin) refutation of binary pigeonhole has encoded size greater than `p(n)`. The full conjecture remains open in this work. [Posted statement](https://pequalnp.com/lemma#L-alg-006)
 
+## Explicit refutations for every bit width
+
+A coordinate search gives a refutation of encoded size at most **`36 n² 4ⁿ`**. Query the first bit of `n+1` pigeons. At least `n/2+1` of them share that bit. Keep that many pigeons and repeat on their remaining bits. A branch of this search inspects at most `2(n−1)+l` bits before it identifies a pair of equal labels and the violated input clause. Compiling the search tree uses integer resolution, Boolean axioms, weakening and simplification. At width zero the input already contains the empty clause. [Checked construction](../lean/PEqualNP/Search/BPHPTreeUpper.lean) · [Recorded statement](L-alg-006-tree-upper.lean.txt)
+
 ## A single balanced equation would suffice
 
 Let `n = 2^l`. Start with the satisfiable instance where `n` pigeons have distinct labels in `n` holes. Suppose a syntactic integer derivation of encoded size `S` proves a line consisting of one equation with at least one nonzero variable coefficient. With one extra pigeon, there is a refutation of encoded size at most **`42 n² S + 1200(n+1)⁵`**. The equation and its coefficients can vary with the bit width. Deriving any such singleton in polynomial size at every positive width would disprove L-alg-006. [Checked theorem](../lean/PEqualNP/Search/BalancedUnitRefutation.lean) · [Recorded statement](L-alg-006-balanced-unit.lean.txt)
@@ -30,7 +34,7 @@ At positive bit width, a pigeonhole refutation of encoded size `S` yields a deri
 
 ## Transferring bounds from other proof systems
 
-For the standard split of each row's bits between two parties and `l ≥ 2`, an integer derivation of just two lines can already have a final line whose falsifying assignments require at least `2^(n−1)` triangles to cover exactly. The two lines together cost at most `4(n−1)+12l+2`. A triangle here is a communication relation whose sets of possible inputs for the second party are nested as the first party's input varies. This example obstructs a direct conversion that replaces each integer line by a small cover of its falsifying assignments. Hrubeš and Pudlák prove an exponential lower bound for Cutting Planes on this binary encoding. [Two-line example](../lean/PEqualNP/Search/BPHPTriangleLine.lean) · [Hrubeš and Pudlák, Theorem 3](https://www.math.cas.cz/~pudlak/RandomCP_FOCS.pdf)
+For the standard split of each row's bits between two parties and `l ≥ 2`, an integer derivation of just two lines can already have a final line whose falsifying assignments require at least `2^(n−1)` triangles to cover exactly. The two lines together cost at most `4(n−1)+12l+2`. A triangle here is a communication relation whose sets of possible inputs for the second party are nested as the first party's input varies. This example obstructs a direct conversion that replaces each integer line by a small cover of its falsifying assignments. Hrubeš and Pudlák prove an exponential lower bound for Cutting Planes on this binary encoding. [Two-line example](../lean/PEqualNP/Search/BPHPTriangleLine.lean) · [Set-disjointness example](../lean/PEqualNP/Search/Helpers/QTriangleCover.lean) · [Hrubeš and Pudlák, Theorem 3](https://www.math.cas.cz/~pudlak/RandomCP_FOCS.pdf)
 
 ## Earlier lower bounds
 
@@ -106,7 +110,8 @@ lake build +PEqualNP.Search.BPHPCubic +PEqualNP.Search.Helpers.BPHPMerge \
   +PEqualNP.Search.PermutationSumRefutation +PEqualNP.Search.CollisionTautologyEquivalence \
   +PEqualNP.Search.BPHPCollisionCost +PEqualNP.Search.BPHPColumnBalance \
   +PEqualNP.Search.BalancedUnitRefutation +PEqualNP.Search.BalancedOccupancyEquivalence \
-  +PEqualNP.Search.BPHPTriangleLine +PEqualNP.Search.BPHPOccupancyCertificate
+  +PEqualNP.Search.BPHPTriangleLine +PEqualNP.Search.Helpers.QTriangleCover \
+  +PEqualNP.Search.BPHPOccupancyCertificate +PEqualNP.Search.BPHPTreeUpper
 ```
 
 From the checkout root, the project's checker can verify the following theorems against their recorded statements.
@@ -136,4 +141,6 @@ node tools/check-lean.mjs lean/PEqualNP/Search/BPHPBalancedOccupancy.lean \
   notes/L-alg-006-balanced-occupancy.lean.txt check
 node tools/check-lean.mjs lean/PEqualNP/Search/BalancedOccupancyEquivalence.lean \
   notes/L-alg-006-balanced-occupancy-equivalence.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BPHPTreeUpper.lean \
+  notes/L-alg-006-tree-upper.lean.txt check
 ```
