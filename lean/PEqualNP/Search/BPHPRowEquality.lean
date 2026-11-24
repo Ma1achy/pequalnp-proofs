@@ -19,7 +19,8 @@ def rowEqualityContextCost (m l w : ℕ) : ℕ :=
   2 ^ (2*l) * ((4*(2*l)+3) * (10 + m*l * 2^l + (2*l) * 2^l + (4*(2*l) + w)) +
     10*(w + 4*(2*l) + 1))
 
-private theorem collision_axiom {m l : ℕ} (i j : Fin m) (hne : i ≠ j)
+/-- When two rows agree, their opposite literals form a collision axiom. -/
+theorem bphp_same_row_axiom {m l : ℕ} (i j : Fin m) (hne : i ≠ j)
     (a : Fin m × Fin l → Bool) (eqs : ∀ b, a (i,b) = a (j,b)) :
     ((({i,j} : Finset (Fin m)) ×ˢ (Finset.univ : Finset (Fin l))).image
       (fun v => (v, a v))) ∈ BPHP m l := by
@@ -66,7 +67,7 @@ theorem bphp_rowEquality_context {m l : ℕ} (i j : Fin m) (hne : i ≠ j)
       exact qLit_size_le v _
   by_cases eqs : ∀ b, a (i,b) = a (j,b)
   · let C := S.image (fun v => (v, a v))
-    have hC : C ∈ BPHP m l := collision_axiom i j hne a eqs
+    have hC : C ∈ BPHP m l := bphp_same_row_axiom i j hne a eqs
     have hrepr (e) : e ∈ G ↔ ∃ t ∈ C, e = litQEq t := by
       rw [memG]
       constructor

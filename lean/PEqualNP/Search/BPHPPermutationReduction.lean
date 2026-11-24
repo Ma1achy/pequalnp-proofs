@@ -10,7 +10,8 @@ namespace PEqualNP.Search
 
 open PEqualNP.ProofComplexity Helpers
 
-private theorem append_traces {V : Type} [Fintype V] [DecidableEq V]
+/-- Append independent integer derivations from the same input formula. -/
+theorem qAppendDerivations {V : Type} [Fintype V] [DecidableEq V]
     {F : Set (ProofComplexity.Clause V)} {π τ : List (QLine V)}
     (d : IsResLinQSynDerivation F π) (base : IsResLinQSynDerivation F τ) :
     IsResLinQSynDerivation F (π ++ τ) := by
@@ -47,7 +48,7 @@ theorem BPHPPermutationReduction (l : ℕ) (b : ℤ)
     simpa only [List.map_cons, List.map_nil, qRenameEq_binaryTotal] using h
   let τ := copy i ++ copy j
   have single : IsResLinQSynDerivation (BPHP (n+1) l) ([binaryRowEq i j] :: τ) :=
-    binaryTotalExcept_cut i j b (append_traces (valid i) (valid j))
+    binaryTotalExcept_cut i j b (qAppendDerivations (valid i) (valid j))
       (List.mem_append_left _ (subtotal i)) (List.mem_append_right _ (subtotal j))
   obtain ⟨σ, done, empty, cost⟩ := bphp_rowEquality_cut (l := l) i j ne _ single
     (fun K hm => (Set.mem_singleton_iff.mp hm) ▸ List.mem_cons_self)

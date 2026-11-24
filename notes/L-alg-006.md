@@ -2,6 +2,18 @@
 
 Write `n = 2^l` for the number of holes. The posted conjecture asks whether, for every polynomial `p`, there is a bit width `l` at which every DAG-like syntactic integer R(lin) refutation of binary pigeonhole has encoded size greater than `p(n)`. The full conjecture remains open in this work. [Posted statement](https://pequalnp.com/lemma#L-alg-006)
 
+## A single balanced equation would suffice
+
+Let `n = 2^l`. Start with the satisfiable instance where `n` pigeons have distinct labels in `n` holes. Suppose a syntactic integer derivation of encoded size `S` proves a line consisting of one equation with at least one nonzero variable coefficient. With one extra pigeon, there is a refutation of encoded size at most **`42 n² S + 1200(n+1)⁵`**. The equation and its coefficients can vary with the bit width. Deriving any such singleton in polynomial size at every positive width would disprove L-alg-006. [Checked theorem](../lean/PEqualNP/Search/BalancedUnitRefutation.lean) · [Recorded statement](L-alg-006-balanced-unit.lean.txt)
+
+Every balanced assignment lists each label exactly once. Swapping the rows holding two labels that differ in just one bit shows that the coefficient of that bit must be the same in every row. It follows that the integer equations true on every balanced assignment are exactly the integer linear combinations of the column balances. Each column contains `n/2` ones at positive width. Flipping a column in a proof isolates its coefficient. Two copies that omit different pigeons then yield a scaled equality between their bits. The Boolean axioms give just three possible bit differences, so eliminating the two nonzero possibilities costs only the bit length of the scale. [Affine characterization](../lean/PEqualNP/Search/BPHPAffineHull.lean) · [Column proof transformation](../lean/PEqualNP/Search/Helpers/BPHPColumnFlip.lean) · [Scale cancellation](../lean/PEqualNP/Search/Helpers/QUnscaleBitEquality.lean)
+
+## Proving that one fixed hole is occupied
+
+In the same balanced instance let `G₀` be the disjunction, over the `n` pigeons, that a pigeon's binary label equals zero. L-alg-006 holds exactly when for every polynomial `p` there is a positive width at which every derivation of `G₀` from the balanced input clauses has encoded size greater than `p(n)`. A refutation with one extra pigeon of size `S` gives a balanced derivation of `G₀` of size at most **`(1000(n+1)⁴ + 2S)S`**. Conversely, a balanced derivation of size `T` gives a refutation of size at most **`4000(n+1)⁷(T+1)`**. In the first direction, set the extra pigeon's bits to zero. In the second, an additional pigeon cannot use hole zero if one of the balanced pigeons occupies it. Flipping columns excludes each possible label of the extra pigeon in turn. [Equivalence](../lean/PEqualNP/Search/BalancedOccupancyEquivalence.lean) · [Refutation to occupancy](../lean/PEqualNP/Search/BPHPBalancedOccupancy.lean) · [Occupancy to refutation](../lean/PEqualNP/Search/BPHPRefuteFromOccupancy.lean)
+
+An interpolation identity gives a compact algebraic proof of the balanced sum from occupancy of every hole. With labels `Xᵢ` and holes `0,…,n−1`, the product `∏ᵢ(h−Xᵢ)` vanishes when hole `h` is occupied. The discrepancy `∑ᵢ Xᵢ−n(n−1)/2`, multiplied by `(n−1)!`, is an integer linear combination of these `n` products with signed binomial coefficients. The identity holds as a polynomial in the labels. Converting this addition of products into the project's rule for combining selected linear equations remains open. [Polynomial identity](../lean/PEqualNP/Search/BPHPOccupancyCertificate.lean)
+
 ## One equation must be hard to evaluate by parity queries
 
 Fix any polynomial line budget `p(n)`. At arbitrarily large bit widths of the form `l = 2^t`, every refutation within that budget contains an equation for which every correct adaptive parity-query algorithm needs **more than `floor(l/(2(t+5)))` queries** in the worst case. The same equation occurs as the result of an integer linear combination and as an operand of a resolution step. The theorem identifies each occurrence together with its earlier premises. Querying its nonzero variable coefficients directly gives an evaluator, so the equation must also use more than this many variables. The lower bound concerns one equation inside a proof whose disjunctions and DAG reuse are unrestricted. [Growing depth bound](../lean/PEqualNP/Search/BPHPActiveDepthWitnesses.lean) · [Support bound](../lean/PEqualNP/Search/BPHPGrowingSupport.lean)
@@ -16,6 +28,10 @@ For the instance with `n+1` pigeons, write one disjunction `G` containing the in
 
 At positive bit width, a pigeonhole refutation of encoded size `S` yields a derivation of `G` of size at most **`64000 S³`**. Conversely, a derivation of `G` of size `T` yields a refutation of size at most **`3300 T⁴`**. [From a refutation to the collision statement](../lean/PEqualNP/Search/BPHPCollisionTautology.lean) · [From the collision statement to a refutation](../lean/PEqualNP/Search/BPHPCollisionCost.lean)
 
+## Transferring bounds from other proof systems
+
+For the standard split of each row's bits between two parties and `l ≥ 2`, an integer derivation of just two lines can already have a final line whose falsifying assignments require at least `2^(n−1)` triangles to cover exactly. The two lines together cost at most `4(n−1)+12l+2`. A triangle here is a communication relation whose sets of possible inputs for the second party are nested as the first party's input varies. This example obstructs a direct conversion that replaces each integer line by a small cover of its falsifying assignments. Hrubeš and Pudlák prove an exponential lower bound for Cutting Planes on this binary encoding. [Two-line example](../lean/PEqualNP/Search/BPHPTriangleLine.lean) · [Hrubeš and Pudlák, Theorem 3](https://www.math.cas.cz/~pudlak/RandomCP_FOCS.pdf)
+
 ## Earlier lower bounds
 
 | Lean result | Bound |
@@ -27,7 +43,7 @@ At positive bit width, a pigeonhole refutation of encoded size `S` yields a deri
 
 A further locality bound holds without restricting coefficients or DAG reuse. Some proof line depends on more than two thirds of the hole count in pigeon rows: for every smaller set of rows, there are two Boolean assignments agreeing on those rows that give different truth values for the line. This alone gives no bound on how many such lines occur. [Semantic pigeon support](../lean/PEqualNP/Search/BPHPPigeonSupport.lean)
 
-There is also a reduction for unrestricted proofs. For every integer refutation of encoded size `s`, there is a prime `p ≤ 16(s+1)²` and a syntactic refutation over the field of `p` elements with at most twice the original line count. The proof chooses a prime preserving nonzero right-hand sides. The sum of their bit lengths bounds the number of exceptional primes. A uniform finite-field line lower bound up to the resulting characteristic bound would therefore settle the integer conjecture. The existing parity theorem handles only characteristic two. [Finite-field reduction](../lean/PEqualNP/Search/BPHPModularReduction.lean)
+There is also a reduction for unrestricted proofs. For every integer refutation of encoded size `s`, there is a prime `p ≤ 16(s+1)²` and a syntactic refutation over the field of `p` elements with at most twice the original line count. The proof chooses a prime preserving nonzero right-hand sides. The sum of their bit lengths bounds the number of exceptional primes. A uniform finite-field line lower bound up to the resulting characteristic bound would therefore settle the integer conjecture. The repository’s checked parity theorem handles characteristic two. Pang gives lower bounds for every fixed prime in a stronger finite-field system. The prime supplied by the integer reduction can grow with proof size. [Pang, Theorem 7.2(e)](https://arxiv.org/abs/2610.00837) [Finite-field reduction](../lean/PEqualNP/Search/BPHPModularReduction.lean)
 
 The parity argument starts from the repository's exponential lower bound for parity resolution. Each integer combination can be simulated by at most four parity steps. Weakening and Boolean axioms also transfer. If all simplifications preserve the parity implication, the whole integer proof gives a short parity refutation. The theorem identifies a pair of lines and a Boolean assignment witnessing the failure of that implication in any sufficiently short proof. Integer arithmetic permits such a failure because `0 = 2` becomes true modulo two. This leaves unrestricted integer proofs as the outstanding case. [Parity simulation](../lean/PEqualNP/Search/Helpers/QParitySimulation.lean) · [Parity lower bound](../lean/PEqualNP/ProofComplexity/L036.lean)
 
@@ -88,7 +104,9 @@ lake build +PEqualNP.Search.BPHPCubic +PEqualNP.Search.Helpers.BPHPMerge \
   +PEqualNP.Search.PrimitiveCancellationExample +PEqualNP.Search.BPHPCancellationWitnesses \
   +PEqualNP.Search.BPHPCancellationMultiplicity +PEqualNP.Search.BPHPActiveDepthWitnesses \
   +PEqualNP.Search.PermutationSumRefutation +PEqualNP.Search.CollisionTautologyEquivalence \
-  +PEqualNP.Search.BPHPCollisionCost
+  +PEqualNP.Search.BPHPCollisionCost +PEqualNP.Search.BPHPColumnBalance \
+  +PEqualNP.Search.BalancedUnitRefutation +PEqualNP.Search.BalancedOccupancyEquivalence \
+  +PEqualNP.Search.BPHPTriangleLine +PEqualNP.Search.BPHPOccupancyCertificate
 ```
 
 From the checkout root, the project's checker can verify the following theorems against their recorded statements.
@@ -112,4 +130,10 @@ node tools/check-lean.mjs lean/PEqualNP/Search/PermutationSumRefutation.lean \
   notes/L-alg-006-permutation-sum.lean.txt check
 node tools/check-lean.mjs lean/PEqualNP/Search/CollisionTautologyEquivalence.lean \
   notes/L-alg-006-collision-equivalence.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BalancedUnitRefutation.lean \
+  notes/L-alg-006-balanced-unit.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BPHPBalancedOccupancy.lean \
+  notes/L-alg-006-balanced-occupancy.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BalancedOccupancyEquivalence.lean \
+  notes/L-alg-006-balanced-occupancy-equivalence.lean.txt check
 ```
