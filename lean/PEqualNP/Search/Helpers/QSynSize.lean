@@ -9,7 +9,8 @@ open PEqualNP.ProofComplexity
 
 variable {V : Type} [DecidableEq V]
 
-private theorem litQEq_injective : Function.Injective (litQEq (V := V)) := by
+/-- Distinct Boolean literals give distinct integer equations. -/
+theorem litQEq_injective : Function.Injective (litQEq (V := V)) := by
   rintro ⟨v, b⟩ ⟨v', b'⟩ he
   have hv : v = v' := by
     by_contra hne
