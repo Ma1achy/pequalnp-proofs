@@ -1,0 +1,58 @@
+# What a small Boolean circuit for Hamiltonicity would have to look like
+
+Let $C$ be a Boolean circuit deciding directed Hamiltonian-cycle existence on the $N(N-1)$ ordered arcs of a labelled loopless graph, for $N\ge3$. Use one input vertex per arc bit. A bit may feed arbitrarily many gates. Define $w$ as the treewidth of the undirected graph with these vertices and the circuit gates, and with an edge for each wire. Binary AND and OR, unary NOT, constants, and a specified output are allowed. Let $V$ count all gates and input vertices.
+
+**Boolean width bound.** Every such circuit has $w=\Omega(N)$, regardless of its size. In particular, a polynomial-size family for the decision problem would have linear or larger treewidth in this shared-input representation. A direct dynamic program gives $w+\log_2 V=\Omega(N)$ without a compilation theorem. The stronger, size-independent conclusion uses the published width-to-knowledge-compilation bound of Amarilli, Capelli, Monet and Senellart. The exact-tour language, which has a deterministic logspace algorithm, has the same width lower bound. The conclusion constrains how Boolean gates and input bits must connect. High treewidth is compatible with polynomial size. [Compilation theorem, Corollary 4.3](https://pierre.senellart.com/publications/amarilli2019connecting.pdf) · [The easy comparison language](easy-dense-layers.md)
+
+## Turning a bounded-width Boolean circuit into a formal polynomial
+
+Associate one Boolean variable to every circuit vertex. Place a zero-or-one constraint on each gate and its immediate inputs, and require the output to be one. For an assignment to the input bits the acyclic circuit has exactly one extension to the internal gates. Products of all constraints therefore count each accepted input once. Give an input bit $e$ weight $X_e$ when true. Two useful choices for its false weight give the following formal polynomials.
+
+| False weight | Weighted sum over circuit transcripts |
+| --- | --- |
+| $1-X_e$ | The unique multilinear polynomial agreeing with Hamiltonicity on every Boolean graph |
+| $1$ | $W(X)=\sum_{E\text{ contains a spanning tour}}\prod_{e\in E}X_e$ over the nonnegative integers |
+
+The first identity follows by evaluating the point indicators on the Boolean cube. The second follows because the selected variables themselves specify the input edge set. Keeping the polynomial weights is essential. A count of accepted inputs only evaluates the second polynomial at all ones.
+
+Take a tree decomposition of the wire graph. Enlarge each bag by adjoining the at most two immediate inputs of every vertex it contains. Each new bag has at most $b=3(w+1)$ vertices and now contains the scope of every gate it hosts. For any wire vertex $u$, its new bags are the union of its old bag subtree with the old subtrees of the gates directly reading $u$. Each of the latter intersects the former because some original bag contains the wire's endpoints. Thus the new bags still satisfy the connectedness condition.
+
+Assign every local constraint and input weight to one bag that contains its scope. Root the tree. For each assignment to the separator between a bag and its parent, sum over the compatible bag assignments. For each such assignment multiply its local factors and the child messages on their respective separators. A Boolean assignment to the whole circuit is determined uniquely by consistent bag assignments, and constraints and input weights are used exactly once. Induction from the leaves proves that the root computes the weighted sum as a formal polynomial. This construction works with any commutative semiring when the chosen weights belong to it. [Sum-product elimination](https://doi.org/10.1016/S0004-3702(99)00059-4) · [Weighted counting with tree decompositions](https://doi.org/10.4230/LIPIcs.ESA.2018.28)
+
+For a bound on size, first contract any neighboring pair of bags with one contained in the other. In a rooted reduced decomposition, each nonroot bag introduces a vertex absent from its parent, and different such bags introduce different vertices. A nonempty root gives at most $V$ bags. Each has at most $2^b$ assignments. Across bags, the number of child factors plus the number of hosted input weights is at most $2V$. Boolean gate constraints can omit a summand, because the truth of a local constraint on a specified bag assignment is known during compilation. Summing the terms and supplying inputs and constants uses $O(V\,2^{3(w+1)})$ arithmetic gates. This establishes existence of the compiled circuit for a given decomposition. The nonuniform lower bound requires no algorithm for finding a decomposition.
+
+The first weight choice directly connects #2's hard formal layer to a Boolean circuit under a width hypothesis. In characteristic two, extracting degree $N$ by gate-wise truncated convolution gives a circuit of size $O((N+1)^2 V 2^{3(w+1)})$ for the formal tour polynomial. Using the pinned reference bound alone gives $w+\log_2 V=\Omega((\log N)^{4/3})$ for sufficiently large $N$. The same compiler with cutoff $N+k$ computes the other hard layers of the canonical representative. [Pinned lower bound](https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/vp-vnp/Statement.lean#L34-L46) · [Individual layers](layer-projection.md)
+
+## Why positive weights strengthen the bound
+
+Choose false weight one. All arithmetic in the compiler now uses only nonnegative coefficients. The smallest accepted edge set has $N$ arcs, and an accepted set with exactly $N$ arcs is a spanning tour. The lowest nonzero homogeneous component of $W$ is exactly $\mathrm{hc}_N$ with coefficient one on every tour. A positive circuit for $W$ gives a positive circuit for this component at the same gate budget. Discard identically zero terms. At each sum retain the inputs of smallest minimum degree, and at each product multiply the two lowest components. Constants and variable gates give the induction base. Positivity precludes cancellation. This is also valid for the exact-tour predicate.
+
+Here is a short counting proof of the exponential monotone lower bound needed in this application. Work with the resulting homogeneous positive circuit for $\mathrm{hc}_N$ and unfold a parse tree for a particular tour monomial, selecting one child at additions and both at products. Start at the root. At each product follow a child of larger degree, until the degree first falls to at most $2N/3$. Additions preserve degree. The stopping gate $g$ has degree $r$ between $N/3$ and $2N/3$. For $N\ge3$ the descent always stops.
+
+For each such gate $g$, let $A_g$ be its monomial support, and $B_g$ the set of monomials contributed by the rest of an output parse tree with one occurrence of $g$ marked and removed. The gate can be shared or occur several times in the unfolded tree. Fixing the rest of the tree and reinstating any parse of that one occurrence gives a valid output monomial. Hence every product from $A_g B_g$ is a spanning tour. The products for at most as many gates as there are circuit slots cover all $(N-1)!$ tours.
+
+Fix a complementary monomial in $B_g$. Its $N-r$ directed arcs extend to a tour and form disjoint directed paths, counting isolated vertices as paths. Contracting them leaves exactly $r$ blocks. A completing tour orders these blocks cyclically, giving at most $(r-1)!$ choices. Distinct $A_g$ monomials give distinct completions. Reversing the roles gives $|B_g|\le(N-r-1)!$. The number of gates is consequently at least
+$$
+\min_{N/3\le r\le2N/3}
+\frac{(N-1)!}{(r-1)!(N-r-1)!}
+=\min_r \frac{r(N-r)}{N}\binom Nr
+=2^{\Omega(N)}.
+$$
+For example $\binom Nr\ge2^{\min(r,N-r)}$ by choosing one item from each of that many disjoint pairs and, if needed, taking complements. This proof uses the standard monotone counting argument for the tour polynomial. Jerrum and Snir obtained exponential semiring bounds for the travelling salesman problem. The elementary path count here is the forced-path contraction used elsewhere in this companion. [Jerrum and Snir, Section 4.4](https://snir.cs.illinois.edu/listed/J7.pdf) · [Weighted tour contraction](ForcedTourWeight.lean)
+
+Combining the direct compiler and the monotone lower bound gives $w+\log_2 V=\Omega(N)$. The result already rules out small width for a polynomial-size Boolean Hamiltonicity decider.
+
+## Removing the size hypothesis
+
+Corollary 4.3 of Amarilli, Capelli, Monet and Senellart gives an equivalent complete deterministic structured decomposable negation-normal form of size $O(m 2^{cw})$ for a Boolean circuit on $m$ variable gates of treewidth $w$, with an absolute $c$. The input length or the size of a supplied tree decomposition can affect compilation time. The output size in this corollary depends only on $m,w$. In our encoding $m=N(N-1)$.
+
+For a self-contained deduction from the compression corollary, compute at every gate of the decomposable circuit the positive generating polynomial of its accepted assignments on its variable set. A positive literal contributes $X_e$ and a negative literal contributes $1$. At AND gates multiply the child polynomials, since their variable sets are disjoint. At an OR gate $g$, multiply each child $h$ by $\prod_{e\in\operatorname{Vars}(g)\setminus\operatorname{Vars}(h)}(1+X_e)$, accounting for arbitrary choices of its missing variables. Add the resulting polynomials. Determinism makes the completed model sets disjoint, so their coefficients count each assignment once. Treat any missing variables at the root in the same way. This constructs $W$ using only nonnegative constants in $O(m)$ operations per compiled wire and $O(m)$ additional input slots. The preceding monotone bound then gives $m^{O(1)}2^{O(w)}\ge2^{\Omega(N)}$, hence $w=\Omega(N)$ independently of $V$.
+
+There is also an optimization interpretation. Take nonnegative edge costs. The minimum cost of any accepted graph is the minimum tour cost, because every accepted graph contains a tour, and a tour itself is accepted. A decomposable circuit combines minimum costs by addition at AND and minimum at OR. The exponential min-plus lower bound for directed travelling salesman gives the same width conclusion. These are applications of known compilation and semiring results. [Width compression, Corollary 4.3](https://pierre.senellart.com/publications/amarilli2019connecting.pdf) · [Algebraic model counting](https://web.cs.ucla.edu/~guyvdb/papers/KimmigJAL16.pdf) · [Read-once optimization of minimal satisfying sets, Jukna](https://web.vu.lt/mif/s.jukna/ftp/readk-submit.pdf) · [Directed travelling salesman lower bound](https://snir.cs.illinois.edu/listed/J7.pdf)
+
+The shared-input convention is substantive. A formula with repeated leaf labels can have a tree as its syntax graph. Treating two leaves labelled $x$ as independent inputs replaces $x$ in the accepted-set computation for $x\land x$ by $x^2$. The width here is measured after identifying equal input bits or enforcing their equality in the circuit graph. Neither linear width nor a hard formal component bounds arbitrary Boolean circuit size superpolynomially. The easy exact-tour language exhibits both phenomena. [Exact-tour comparison](easy-dense-layers.md)
+
+
+## Verification
+
+The circuit compilation, counting and asymptotic width arguments above are written proofs. Lean checks the symbolic identity for deterministic transcripts. The executable checks compare signed-weight dynamic programming with independently computed Boolean Möbius transforms, and compare the positive minimum terms with enumerated tour monomials. [Lean identity](TreewidthTransfer.lean) · [Executable examples](boolean_treewidth.py)

@@ -1,0 +1,57 @@
+# Projecting a single homogeneous Hamiltonicity layer onto the tour polynomial
+
+Let $F_N$ be the unique multilinear polynomial over a field $K$ that takes the value one on a loopless directed graph with a spanning tour and zero otherwise. Write $L_{N,d}=[F_N]_d$ for its degree-$d$ homogeneous component, with components outside the degree range understood to be zero. The variables are ordered arcs of a labelled graph. A spanning tour is counted once as a cyclic permutation. For $N\ge2$, diagonal variables in the reference encoding can be omitted.
+
+**Projection theorem.** For $n\ge2$, $k\ge3$ and $N=n+k$, a single substitution of variables and constants transforms $L_{N,n+2k}$ into the formal tour polynomial $\mathrm{hc}_n$. It uses only $0,1,-1$ as constants. The same substitution takes $L_{N,d+2k}$ to $L_{n,d}$ for every $d\ge0$. In characteristic two all constants are Boolean. A circuit for the source layer thus yields a circuit of the same size for the target. At surplus one and two the layers vanish. [Single-layer proof below](#two-opposite-orientations) · [Vanishing layers](anf-cores.md) · [Gate-preserving substitution](CircuitProjection.lean)
+
+For fixed $k\ge3$, the family of these individual degree-$N+k$ polynomials is VNP-complete over every field under polynomially bounded projections. This classifies an explicit polynomial derived from a decision function. The earlier deterministic logspace comparison already has these very same fixed-surplus layers. Getting a small circuit for a canonical layer from a circuit that decides the language on bits is the unresolved step. [Membership proof below](#vnp-membership-for-logarithmic-surplus) · [Logspace comparison](degree-prefix.md)
+
+## Splicing two directed graphs
+
+Take disjoint rooted vertex sets $A,B$ and one rooted graph on each. For every permitted arc, interchange its destination if that destination is one of the two roots. Keep its source and all other destinations. Allow no additional arcs. This sends distinct permitted arcs to distinct positions. Changing a root destination sends an arc across the two blocks, so no new self-loop is introduced.
+
+Root a tour of the combined graph at the root of $A$. Its only possible entry into $B$ is the root of $B$, and its only return to $A$ is the closing step to its original root. The tour therefore lists all vertices of $A$ and then all vertices of $B$. Restoring the two destinations gives one spanning tour on each side. Conversely, joining the two rooted tour lists by exchanging their closing destinations gives precisely one combined tour. This works on every selected subset of permitted arcs. [Lean rooted-tour bijection](SplicedTours.lean) · [Lean proof using the reference permutation predicate](SplicePermutation.lean)
+
+Keep all permitted arcs as distinct indeterminates and set the others to zero. Under this first substitution the combined canonical polynomial is exactly $F_A(X)F_B(Z)$, where $F_A,F_B$ are the canonical decision polynomials of the respective templates. Both sides are multilinear because the variable sets are disjoint, and they agree on every Boolean point by the bijection. Multilinear polynomials with the same values on the cube have equal coefficients, including over finite fields. The first substitution only deletes and renames variables, so it commutes with taking a homogeneous component.
+
+## Two opposite orientations
+
+Use the full loopless digraph on $n$ vertices for $A$. Take a simple undirected $k$-cycle for $B$, with both orientations of each edge available. Its only directed spanning tours are the clockwise and counterclockwise orders. Let $u,v$ be their arc monomials. They have disjoint variables, each of degree $k$. The canonical decision polynomial of $B$ is their Boolean disjunction $u+v-uv$. Consequently the combined degree-$d+2k$ layer, after deleting the unavailable arcs, is exactly
+
+$$
+(u+v)L_{n,d+k}-uvL_{n,d}.
+$$
+
+Assign $1$ to every gadget arc except one counterclockwise arc, which receives $-1$. This gives $u=1$, $v=-1$, and leaves $L_{n,d}$ with coefficient $+1$. Extraction precedes this last constant assignment. In particular, taking $d=n$ gives $\mathrm{hc}_n$. A set of $n$ arcs has no winning proper subset, so its multilinear coefficient is one precisely when it is a spanning tour. This last argument applies over every field. The sign on the gadget is an arithmetic substitution into the extracted polynomial. [Formal polynomial-valued specialization](LayerProjection.lean) · [Characteristic-two tour-layer identity](TourLayer.lean)
+
+For example, in characteristic two a bidirected triangle contributes two degree-three terms and one degree-six term. Setting its six coordinates equal to a formal parameter $t$ makes its polynomial $t^6$. Giving each base arc weight $t x_e$ and every triangle arc weight $t$ produces $t^6 F_n(tx)$. Its $t^{n+6}$ coefficient is exactly the degree-$n$ polynomial of the original graph, with its edge variables still indeterminate. This argument uses formal coefficients and works even when the field has only two elements.
+
+The two missing surplus layers vanish over every field. Two distinct cyclic permutations cannot differ on just one outgoing arc. If they differ on exactly two, one is obtained from the other by a transposition of destinations, contradicting their common permutation sign. Thus their union uses at least $n+3$ arcs. On every graph with at most $n+2$ arcs, existence agrees with the ordinary sum of tour indicators because there is at most one tour. Boolean Möbius inversion on each such support gives the same coefficients as the homogeneous degree-$n$ tour polynomial.
+
+## Exact and approximate circuit lower bounds
+
+Fix a characteristic. For $n=N-k$ above the reference theorem's threshold, a formal circuit for $L_{N,N+k}$ must have more than $n^{c(\log_2 n)^{1/3}}$ slots, for the same absolute $c>0$ as in the reference. Applying the substitution above to every input slot preserves the list of addition and multiplication gates, including their sharing and their indices. The same implication holds for the reference's approximate circuits. A variable or ground-field constant substitution acts on a finite collection of variable monomials in a Laurent-coefficient polynomial. For each output monomial it takes finite ground-field linear combinations of the old coefficients. Negative powers of the error parameter still vanish and the constant term becomes precisely the projected target. The exact and approximate source theorems may use their respective constants and thresholds. [Circuit definitions and lower bounds](https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/vp-vnp/Statement.lean#L20-L61) · [Checked source theorems](https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/vp-vnp/Solution.lean#L26-L45)
+
+For growing $k$, this two-orientation construction gives a bound in $N-k$. In fixed positive characteristic, padding with more symmetric directed graphs yields a bound in $N-O(\sqrt{k})$ instead. It applies even when $k$ grows faster than $N$. [Dense padding theorem](orbit-padding.md)
+
+## VNP membership for logarithmic surplus
+
+Let $k=k(N)\ge0$ with $k=O(\log N)$. The following identity holds over any field, by Boolean Möbius inversion. Here $D_N$ is the full loopless arc set, $x_E=\prod_{e\in E}x_e$ and $H_N(T)$ is the zero-or-one Hamiltonicity decision on the selected arc set $T$.
+
+$$
+ L_{N,N+k}(x)=
+ \sum_{E,T\subseteq D_N}
+ [|E|=N+k]\,[T\subseteq E]\,(-1)^{|E|-|T|} H_N(T)\,x_E.
+$$
+
+There is a polynomial-size Boolean circuit checking the three conditions on the masks $E,T$, including $H_N(T)$. It rejects invalid size or containment before testing Hamiltonicity. On a valid pair, reject any vertex of outdegree zero. Otherwise enumerate one outgoing choice per vertex. If the outdegrees are $d_i$, there are at most $\prod_i 2^{d_i-1}\le2^k$ choices. Check whether each resulting successor map is one spanning cycle. This takes $2^k\operatorname{poly}(N)$ time. A decision circuit of polynomial size follows for logarithmic $k$, with the chosen width hardwired for each input length.
+
+To implement the sum in Valiant's definition, guess both masks and every internal wire bit of the deterministic Boolean checking circuit. Enforce each bounded-fan-in gate by its constant-degree Boolean truth-table indicator, and require output one. Every accepted mask pair has exactly one satisfying wire assignment. Multiply these factors by $\prod_e(1-E_e+E_ex_e)$ and $\prod_e(1-2(E_e-T_e))$. On valid pairs the first contributes $x_E$ and the second gives precisely the deletion sign. The product has polynomial formal degree and a polynomial-size arithmetic circuit. There are polynomially many witness bits. This supplies VNP membership over every field without a bound on how many tours the selected graph contains. [Pinned VNP definition](https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/vp-vnp/Statement.lean#L86-L94) · [Unique Boolean gate transcripts, Hrubeš, Proposition 3](https://users.math.cas.cz/~hrubes/PDFs/Mult.pdf#page=3)
+
+The formal tour family is VNP-complete over every field. The projection theorem and membership prove completeness for every fixed $k\ge3$. They also prove it for any sequence with $3\le k(N)=O(\log N)$ eventually. To realize a target on $m$ vertices, take $N=2m$ for sufficiently large $m$. The theorem supplies a tour polynomial on $N-k(N)\ge m$ vertices. Reduce it to $\mathrm{hc}_m$ by stretching one vertex of the $m$-vertex graph into a forced directed path of the required length. Internal arcs receive weight one, forbidden arcs receive zero, and all other arc weights are copied. Contracting the path is a weight-preserving tour bijection. The finitely many smaller targets can use larger source indices. This is a nonuniform family statement. [Formal tour completeness background](https://users.math.cas.cz/~hrubes/PDFs/Mult.pdf#page=2) · [Weighted path contraction](ForcedTourWeight.lean)
+
+## Checks and context
+
+The graph correspondence and algebraic specialization have separate Lean proofs. The Python check independently enumerates actual directed tours in the spliced graph, forms the signed inclusion–exclusion polynomial over the integers through the required degree, and compares every projected coefficient with the formal tour sum. It also computes a separate parity expansion over the field of two elements. Exhausting the 16 combinations $2\le n\le5$, $3\le k\le6$ tests the signs, arc encoding and order of specialization. The complexity-class consequences above are written proofs. [Tour bijection](SplicedTours.lean) · [Layer identity](LayerProjection.lean) · [Finite coefficient checks](check_layer_projection.py)
+
+In reliability theory the signed union expansion of a monotone Boolean function in terms of its minimal success sets gives $u+v-uv$ in the two-tour case. Related graph motif work studies the signed sum of properties on edge subgraphs as the alternating enumerator. Those formulas provide context for the coefficient calculations. The specific reduction proved here exchanges two root destinations and then specializes one formal homogeneous layer. [Marichal, Theorem 1 and Corollary 2](https://orbilu.uni.lu/bitstream/10993/23215/1/StructureFunctionsMinimalPathSets.pdf#page=3) · [Dörfler, Roth, Schmitt and Wellnitz](https://doi.org/10.1007/s00453-021-00894-9)
