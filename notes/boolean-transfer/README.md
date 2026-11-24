@@ -1,0 +1,63 @@
+# From formal Hamiltonian-cycle lower bounds to Boolean decision circuits
+
+**The first nonzero degree of directed Hamiltonian-cycle existence recovers the formal Hamiltonian-cycle polynomial.** Let a bit indicate each possible directed edge on $m$ labelled vertices. Over the field of two elements, let $F_m$ be the unique multilinear polynomial for “the input graph contains a Hamiltonian cycle.” Its degree-$m$ homogeneous component is exactly the polynomial bounded by the source theorem. This gives a restricted arithmetic-circuit lower bound for an NP **decision** problem and a precise obstruction to extending it. [Proof and executable construction](boolean_jet.md) · [Source theorem](https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/vp-vnp/Statement.lean#L34-L46)
+
+For an edge set $T$, its multilinear coefficient is the XOR of the decision values on all subsets of $T$. When $T$ has $m$ edges, every proper subset is too small to contain a tour. The coefficient is therefore one exactly when $T$ itself is a tour. For $m\ge3$, existence and parity agree through degree $m+2$. The first corrections occur at degree $m+3$, precisely on unions of two tours differing on three outgoing arcs. For three vertices, let $u$ and $v$ be the degree-three monomials of the two opposite tours. Parity is $u+v$ and existence is $u+v+uv$. On the complete loopless digraph both tours are present, so the degree-six correction changes the answer from zero to one. [Lean proof of the degree-$m$ identity](TourLayer.lean) · [Proof of the first correction](boolean_jet.md#first-disagreement-between-existence-and-parity-of-tours)
+
+## What this implies for circuit size
+
+Suppose an unrestricted-degree arithmetic DAG of size $S$ computes the right decision bit on every graph. Inspect its **formal output after cancellations**. Let $B$ contain all edge variables that occur with exponent at least two in any surviving monomial involving at most $m$ distinct variables, and put $b=|B|$. For all sufficiently large $m$, the source's positive constant $c$ gives
+
+$$
+1+(m+1)^2\big[2^b(S+b+1)+2b\big]
+  > m^{c(\log_2 m)^{1/3}}.
+$$
+
+To see why, specialize just the $b$ variables in all possible ways and recombine the resulting circuits with Boolean selectors. This reduces their positive exponents to one. Monomials involving more than $m$ variables still have degree greater than $m$, and every remaining low-support monomial is now multilinear. Extracting degree $m$ by gate-by-gate convolution therefore computes the **formal** tour polynomial. The displayed left side counts every copied circuit, selector and convolution gate, including input and constant gates. The construction needs only a supplied $B$ and allows arbitrary sharing. The algebraic identity is checked as `partial_component_of_correct`. [Lean theorem](TourLayer.lean) · [Construction, exact bound and proof](boolean_jet.md#formal-output-tradeoff-for-an-np-decision-problem)
+
+With polynomial-size circuits, this forces $b\ge c(\log_2 m)^{4/3}-O(\log m)$. In particular, polynomial size is impossible for multilinear outputs or for outputs with only $O(\log m)$ such coordinates. A checkable syntactic sufficient restriction counts the distinct variables shared by the two children of any multiplication. The unrestricted problem permits many repeated variables, even when the Boolean circuit is small. A polynomial-size Boolean decision family, if one exists, would therefore give an explicit family whose canonical multilinear representatives require superpolynomial formal circuits. [Syntactic version and resource bounds](balanced.md#a-restricted-transfer-with-a-constructive-gate-bound)
+
+## What was checked
+
+| Classification | Result |
+| --- | --- |
+| Lean-verified theorem | For finitely many variables over an integral domain, a polynomial vanishes on every Boolean input iff it belongs to the Boolean ideal. Each coset has a unique multilinear representative. The existence proof gives no polynomial circuit-size bound. [BooleanIdeal.lean](BooleanIdeal.lean) · [Ideal and projection details](ideal-notes.md) |
+| Lean-verified counterexamples | A Boolean-vanishing polynomial has nonzero projection onto degree one in each block under the upstream operator. Another has nonzero truncated evaluation at the project's actual nil-tree code. [SourceBridge.lean](SourceBridge.lean) |
+| Lean-verified obstruction | Over characteristic two, repeated squaring preserves every Boolean-valued evaluation and erases positive formal homogeneous degrees below the exponent, even after polynomial substitution. One squaring erases coefficients with an exponent of one. The upstream gate cost for $j$ squarings is $j$ extra slots. [Frobenius.lean](Frobenius.lean) · [SquaringCost.lean](SquaringCost.lean) |
+| Lean-verified conditional implication | An $s$-gate AND/OR/NOT DAG translates to $3s$ slots in the upstream model over the field of two elements. Ruling out **every** polynomial-size cube-correct arithmetic family for a decision function rules out polynomial-size Boolean families for it. [CircuitDAG.lean](CircuitDAG.lean) · [CircuitTransfer.lean](CircuitTransfer.lean) |
+| Restricted-model result with a mathematical proof | The displayed decision lower bound follows by recovering the formal tour polynomial. Lean proves that partial reduction on the specified coordinates of **any** cube-correct decision polynomial yields exactly the formal tour polynomial in degree $m$. The proof covers arbitrary sharing and cancellation. The general subset-XOR, first-minterm and partial-reduction identities are Lean-checked. The sharp degree-$m+3$ correction, circuit-size accounting and asymptotic consequence are written proofs. [Tour identity](TourLayer.lean) · [Minterm proof](MinTerm.lean) · [Partial-reduction proof](PartialLayer.lean) · [Decision proof](boolean_jet.md) |
+| Verified finite experiments | Exhaustive checks include all 64 three-vertex and 4,096 four-vertex loopless digraphs, 262,948 products in truncated Boolean polynomial rings, and direct formal expansion of a compiled three-vertex circuit. [Reproduction script](boolean_jet.py) |
+| Open question | Does an explicit NP decision language lack polynomial-size arithmetic families agreeing with it on the whole Boolean cube, allowing arbitrary formal degree, sharing and output monomials? The hypothesis of the conditional theorem remains open. |
+
+## Where the source proof needs more
+
+* **Balanced decomposition, E.4.** The source takes the coefficient of one degree-one variable from each block. If a product gate contributes a formal squarefree monomial, its children partition the variables in that monomial. After Boolean multilinear reduction the children can overlap. For example, the reduced product of $x_1 x_2$ and $x_1$ has full coefficient one, although the disjoint-split formula gives zero. This breaks the gate identity used by this proof. The existential possibility of a different decomposition remains open. [Source map](source-map.md#two-source-operations) · [Gate identity and replacement](balanced.md)
+* **Low-degree evaluation, K.2 and K.3.** K.2 correctly evaluates an ordinary formal truncation at an encoded tree, including for a polynomial of high degree. K.3 uses a degree hypothesis to identify this with the full value. The canonical Boolean low-support truncation is function-invariant and admits direct computation on the Hamming ball with one evaluation per ball point. The ball can be exponential when the cutoff grows. At the next Hamming layer the black-box method already needs every proper-subset value in the worst case. A weighted program with the paper's run bounds does not follow from this construction. [Source map](source-map.md#exact-use-in-k3) · [Boolean replacement](boolean_jet.md#what-survives-of-the-papers-evaluation-lemma)
+
+Over the field of two elements the converse size simulation also holds on the cube. Each arithmetic addition is XOR, expressible as $(a\lor b)\land\neg(a\land b)$ in four Boolean gates. Each multiplication is AND and each field constant is one bit. Keeping earlier wires gives at most four Boolean gates per arithmetic slot. Thus excluding every cube-correct arithmetic family is itself a general Boolean circuit lower bound. This converse is a written observation.
+
+The circuit families in the conditional theorem are nonuniform, indexed by the number of input bits, and the constants and exponent in a polynomial bound must work at every length. Directed tour existence is in NP by its vertex-order certificate. The Lean theorem has $m^2$ arc variables. For $m\ge2$ a tour uses no diagonal arc, so ignoring those coordinates gives the loopless encoding with $m(m-1)$ bits. One can reject other string lengths or use an explicit size header. For SAT the length parameter would be the full encoded formula length. A deterministic polynomial-time machine can be unrolled into polynomial-size Boolean circuits, hardwiring each length and simulating its configurations for the time bound. Thus a lower bound of the stated unrestricted kind for a language in NP would imply P ≠ NP. A nonuniform upper bound alone would provide no uniform algorithm. The argument uses neither an exact-counting algorithm nor a decision-to-parity reduction. [Conditional theorem](CircuitTransfer.lean) · [Background](https://www.scottaaronson.com/papers/pnp.pdf)
+
+This companion uses the arithmetic theorem at a pinned revision and leaves its source and targets intact. The earlier affine-elimination work concerns projecting exact relations. In particular, testing whether selected edges **are** a tour and testing whether a graph **contains** a tour are different decision functions. This companion uses the latter throughout the lower-bound argument. [Earlier research](https://github.com/Ma1achy/pequalnp-proofs/tree/30709949f9116bd1200223a54751e0d600e6d4e0/notes/affine-elimination/cycle2)
+
+The companion is on a research branch of the P versus NP contributor fork. The project's desk accepts a single Lean proof of an assigned statement. This work supplies checkable lemmas and a target for future Boolean circuit gaps. [Contribution rules](https://github.com/brilliant-hq/pequalnp-proofs/blob/main/CONTRIBUTING.md)
+
+## Verification and reproduction
+
+The complete companion check passed on 24 November 2026. Lean 4.33.1 compiled all nine modules with warnings treated as errors. The axiom audit checked all 55 public theorem declarations, and nanoda independently replayed their proof terms with only `propext`, `Classical.choice`, and `Quot.sound` permitted. The Python checks passed, including 640 formal-output and size-bound checks for the compiler. On the three-vertex example it built a 24-gate formal circuit from a 15-gate Boolean-correct representation. The finite bound there was 577 gates. [Exact verification commands](verify.sh) · [Compiler results](boolean_jet.md#verification)
+
+Use the pinned Lean 4.33.1 toolchain through elan. From a clean directory, set `COMPANION` to the absolute path of this folder and run the following commands. The first three Lake commands inside the checkout reproduce the full source baseline. The final script builds the needed upstream modules, type-checks the companion in a fresh temporary module directory, audits theorem dependencies, and runs the finite checks.
+
+~~~bash
+git clone https://github.com/anthropics/formal-math.git
+git -C formal-math checkout 11b6c7e3c927df2658f513b6b68ea7f8929c62c5
+cd formal-math/vp-vnp
+lake exe cache get
+lake build
+lake env lean scripts/PrintAxioms.lean
+bash "$COMPANION/verify.sh" "$PWD"
+~~~
+
+For independent local replay of the companion, also set `BOOLEAN_LEAN4EXPORT` to a compatible `lean4export` executable and `BOOLEAN_NANODA` to `nanoda_bin` before invoking the script. To run the source project's full comparator in a supported Linux environment, use `bash ../.github/scripts/comparator-check.sh` from `vp-vnp`. The Python experiments alone require Python 3.10+ and its standard library. [Exact baseline and environment](baseline.md)
+
+The gate and projection definitions follow *VP ≠ VNP over every field*, copyright 2026 Anthropic, PBC, licensed under Apache 2.0. The companion imports the pinned project. [Upstream notice](https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/vp-vnp/NOTICE) · [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0)
