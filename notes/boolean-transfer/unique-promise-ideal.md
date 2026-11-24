@@ -46,6 +46,8 @@ $$
 $$
 for a constant $c>0$. Thus even **allowing arbitrary errors on supports containing two tours**, the identities on fewer arc bits cannot supply a polynomial-size solution to this congruence. Here $|A|$ measures the number of distinct identities sufficient for membership, independent of how many times the circuit uses a wire. The unrestricted Boolean model allows all $n(n-1)$ identities. [Partial interpolation and its circuit](boolean_jet.md) · [Lean exponent-clipping lemma](PartialLayer.lean)
 
+A restriction using vertex-disjoint variable arcs strengthens this count to **all but $N^{1+o(1)}$ arc identities** (here $N$ is the number of vertices), and a separate argument gives the same near-full rank requirement for arbitrary affine forms. [Stronger coordinate bound](matched-arcs.md) · [Affine bound](affine-compression.md)
+
 ## Verification
 
 Lean proves recovery of coefficients on a downward-closed Boolean domain, the ideal membership criterion for arbitrary polynomial terms, and the equivalence for formally multilinear promise-correct outputs. It also proves that the degree-$n$ layer of any ordinary polynomial congruent to the tour polynomial modulo $D$ equals the tour polynomial. The $n+3$ threshold, circuit-size deductions, and bounded-set interpolation consequence above are written arguments. On all 4,096 four-vertex graphs the executable tests found 270 supports containing two or more tours. Independently choosing coefficients on those supports preserved all 3,826 promised answers. In the other direction, arbitrary sampled completions changed canonical coefficients only on those 270 supports. [Formal ideal and extraction](PromiseIdeal.lean) [Finite interpolation tests](promise_isolation.py) · [Boolean normal form](BooleanIdeal.lean)
