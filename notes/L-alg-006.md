@@ -4,6 +4,10 @@ Write `n = 2^l` for the number of holes. The posted conjecture asks whether, for
 
 ## Explicit refutations for every bit width
 
+There is a DAG-like syntactic integer refutation of encoded size at most **`1000(n+1)¹⁰ 2ⁿ`** for every `n = 2^l`. For each subset `H` of the holes, derive the line saying that at least one of the first `|H|+1` pigeons lies outside `H`. Read the last of those pigeons. If its label is outside `H`, it witnesses the line. If its label is `h ∈ H`, reuse the previously derived line for `H` with `h` removed. A collision clause prevents an earlier pigeon from taking `h`. There are `2ⁿ` subsets, and each transition costs at most `1000(n+1)¹⁰`. Taking `H` to be all holes gives the empty line. The exponential number of states leaves the polynomial-size question open. [Checked construction](../lean/PEqualNP/Search/BPHPDagUpper.lean) · [State transition](../lean/PEqualNP/Search/BPHPSubsetStep.lean) · [Recorded statement](L-alg-006-dag-upper.lean.txt)
+
+Permuting bit positions and flipping chosen bits give `n l!` relabelings of the holes. Covering this construction's subset states by the images of `R` representatives requires `R n l! ≥ 2ⁿ`. For `l ≥ 5` this leaves at least `2^(n/2)` representatives. Constant-row assignments distinguish the Boolean functions of any two different subsets. This counts states in the subset construction. [Symmetry bound](../lean/PEqualNP/Search/BPHPSubsetSymmetry.lean)
+
 A coordinate search gives a refutation of encoded size at most **`36 n² 4ⁿ`**. Query the first bit of `n+1` pigeons. At least `n/2+1` of them share that bit. Keep that many pigeons and repeat on their remaining bits. A branch of this search inspects at most `2(n−1)+l` bits before it identifies a pair of equal labels and the violated input clause. Compiling the search tree uses integer resolution, Boolean axioms, weakening and simplification. At width zero the input already contains the empty clause. [Checked construction](../lean/PEqualNP/Search/BPHPTreeUpper.lean) · [Recorded statement](L-alg-006-tree-upper.lean.txt)
 
 ## A single balanced equation would suffice
@@ -47,7 +51,7 @@ For the standard split of each row's bits between two parties and `l ≥ 2`, an 
 
 A further locality bound holds without restricting coefficients or DAG reuse. Some proof line depends on more than two thirds of the hole count in pigeon rows: for every smaller set of rows, there are two Boolean assignments agreeing on those rows that give different truth values for the line. This alone gives no bound on how many such lines occur. [Semantic pigeon support](../lean/PEqualNP/Search/BPHPPigeonSupport.lean)
 
-There is also a reduction for unrestricted proofs. For every integer refutation of encoded size `s`, there is a prime `p ≤ 16(s+1)²` and a syntactic refutation over the field of `p` elements with at most twice the original line count. The proof chooses a prime preserving nonzero right-hand sides. The sum of their bit lengths bounds the number of exceptional primes. A uniform finite-field line lower bound up to the resulting characteristic bound would therefore settle the integer conjecture. The repository’s checked parity theorem handles characteristic two. Pang gives lower bounds for every fixed prime in a stronger finite-field system. The prime supplied by the integer reduction can grow with proof size. [Pang, Theorem 7.2(e)](https://arxiv.org/abs/2610.00837) [Finite-field reduction](../lean/PEqualNP/Search/BPHPModularReduction.lean)
+There is also a reduction for unrestricted proofs. For every integer refutation of encoded size `s`, there is a prime `p ≤ 16(s+1)²` and a syntactic refutation over the field of `p` elements with at most twice the original line count. The proof chooses a prime preserving nonzero right-hand sides. The sum of their bit lengths bounds the number of exceptional primes. A uniform finite-field line lower bound up to the resulting characteristic bound would therefore settle the integer conjecture. The repository’s checked parity theorem handles characteristic two. Pang gives lower bounds for every fixed prime in a stronger finite-field system. The prime supplied by the integer reduction can grow with proof size. [Pang, Theorem 7.2(e)](https://arxiv.org/abs/2610.00837) · [Finite-field reduction](../lean/PEqualNP/Search/BPHPModularReduction.lean)
 
 The parity argument starts from the repository's exponential lower bound for parity resolution. Each integer combination can be simulated by at most four parity steps. Weakening and Boolean axioms also transfer. If all simplifications preserve the parity implication, the whole integer proof gives a short parity refutation. The theorem identifies a pair of lines and a Boolean assignment witnessing the failure of that implication in any sufficiently short proof. Integer arithmetic permits such a failure because `0 = 2` becomes true modulo two. This leaves unrestricted integer proofs as the outstanding case. [Parity simulation](../lean/PEqualNP/Search/Helpers/QParitySimulation.lean) · [Parity lower bound](../lean/PEqualNP/ProofComplexity/L036.lean)
 
@@ -111,7 +115,8 @@ lake build +PEqualNP.Search.BPHPCubic +PEqualNP.Search.Helpers.BPHPMerge \
   +PEqualNP.Search.BPHPCollisionCost +PEqualNP.Search.BPHPColumnBalance \
   +PEqualNP.Search.BalancedUnitRefutation +PEqualNP.Search.BalancedOccupancyEquivalence \
   +PEqualNP.Search.BPHPTriangleLine +PEqualNP.Search.Helpers.QTriangleCover \
-  +PEqualNP.Search.BPHPOccupancyCertificate +PEqualNP.Search.BPHPTreeUpper
+  +PEqualNP.Search.BPHPOccupancyCertificate +PEqualNP.Search.BPHPTreeUpper \
+  +PEqualNP.Search.BPHPDagUpper +PEqualNP.Search.BPHPSubsetSymmetry
 ```
 
 From the checkout root, the project's checker can verify the following theorems against their recorded statements.
@@ -143,4 +148,8 @@ node tools/check-lean.mjs lean/PEqualNP/Search/BalancedOccupancyEquivalence.lean
   notes/L-alg-006-balanced-occupancy-equivalence.lean.txt check
 node tools/check-lean.mjs lean/PEqualNP/Search/BPHPTreeUpper.lean \
   notes/L-alg-006-tree-upper.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BPHPDagUpper.lean \
+  notes/L-alg-006-dag-upper.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BPHPSubsetSymmetry.lean \
+  notes/L-alg-006-subset-symmetry.lean.txt check
 ```

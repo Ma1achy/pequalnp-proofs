@@ -1,0 +1,6 @@
+∀ (l : ℕ) (reps : List (Finset (Fin l → Bool))),
+  (∀ S : Finset (Fin l → Bool), ∃ R ∈ reps, ∃ (σ : Equiv.Perm (Fin l)) (mask : Fin l → Bool),
+    S = R.image (fun x j => Bool.xor (x (σ j)) (mask j))) →
+  let n := 2 ^ l
+  2 ^ n ≤ (n * l.factorial) * reps.length ∧
+    (5 ≤ l → 2 ^ (n / 2) ≤ reps.length)
