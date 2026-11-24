@@ -1,0 +1,8 @@
+∃ π : (l : ℕ) → List (PEqualNP.Search.QLine (Fin (2^l+1) × Fin l)),
+  (∀ l : ℕ, PEqualNP.Search.IsResLinQSynRefutation
+    (PEqualNP.ProofComplexity.BPHP (2^l+1) l) (π l) ∧
+    PEqualNP.Search.resLinQSize (π l) ≤ 2^(512*(l+2)*2^((l+1)/2))) ∧
+  ∀ p : Polynomial ℕ, ∃ L : ℕ, ∀ l : ℕ, L ≤ l →
+    ∀ ρ : List (PEqualNP.ProofComplexity.LinClause (Fin (2^l+1) × Fin l)),
+      PEqualNP.ProofComplexity.IsLinRefutation (PEqualNP.ProofComplexity.BPHP (2^l+1) l) ρ →
+      p.eval (PEqualNP.Search.resLinQSize (π l)) < ρ.length

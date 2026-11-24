@@ -12,6 +12,8 @@ There are `(b+1)^(n/b)` count vectors. The encoded cost per transition, and the 
 
 At every positive width the one-line disjunction of all pairwise collisions also has an integer derivation from the Boolean axioms alone of size at most `2^(522(l+2) · 2^ceil(l/2))`. This transfers the bound to the equivalent version of L-alg-006. [Boolean-axiom proof](../lean/PEqualNP/Search/CollisionSubexponential.lean)
 
+On these same formulas, every polynomial in the encoded size of the constructed integer proofs is eventually smaller than the number of lines in **every parity-resolution refutation**. The repository's parity lower bound grows as `exp(n/(32768 l²))`, which eventually exceeds every fixed power of the integer upper bound. Thus a polynomial-cost translation of all these integer proofs into parity resolution is impossible. [Separation theorem](../lean/PEqualNP/Search/BPHPParitySeparation.lean) · [Parity lower bound](../lean/PEqualNP/ProofComplexity/L036.lean)
+
 ### Earlier constructions
 
 There is a DAG-like syntactic integer refutation of encoded size at most **`1000(n+1)¹⁰ 2ⁿ`** for every `n = 2^l`. For each subset `H` of the holes, derive the line saying that at least one of the first `|H|+1` pigeons lies outside `H`. Read the last of those pigeons. If its label is outside `H`, it witnesses the line. If its label is `h ∈ H`, reuse the previously derived line for `H` with `h` removed. A collision clause prevents an earlier pigeon from taking `h`. There are `2ⁿ` subsets, and each transition costs at most `1000(n+1)¹⁰`. Taking `H` to be all holes gives the empty line. The exponential number of states leaves the polynomial-size question open. [Checked construction](../lean/PEqualNP/Search/BPHPDagUpper.lean) · [State transition](../lean/PEqualNP/Search/BPHPSubsetStep.lean) · [Recorded statement](L-alg-006-dag-upper.lean.txt)
@@ -128,7 +130,8 @@ lake build +PEqualNP.Search.BPHPCubic +PEqualNP.Search.Helpers.BPHPMerge \
   +PEqualNP.Search.BPHPOccupancyCertificate +PEqualNP.Search.BPHPTreeUpper \
   +PEqualNP.Search.BPHPDagUpper +PEqualNP.Search.BPHPSubsetSymmetry \
   +PEqualNP.Search.BPHPBlockUpper +PEqualNP.Search.BPHPSubexponential \
-  +PEqualNP.Search.CollisionSubexponential +PEqualNP.Search.Helpers.BlockLittleO
+  +PEqualNP.Search.CollisionSubexponential +PEqualNP.Search.Helpers.BlockLittleO \
+  +PEqualNP.Search.BPHPParitySeparation
 ```
 
 From the checkout root, the project's checker can verify the following theorems against their recorded statements.
@@ -170,4 +173,6 @@ node tools/check-lean.mjs lean/PEqualNP/Search/BPHPSubexponential.lean \
   notes/L-alg-006-subexponential.lean.txt check
 node tools/check-lean.mjs lean/PEqualNP/Search/CollisionSubexponential.lean \
   notes/L-alg-006-collision-subexponential.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BPHPParitySeparation.lean \
+  notes/L-alg-006-parity-separation.lean.txt check
 ```
