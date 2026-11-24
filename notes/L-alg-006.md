@@ -41,6 +41,16 @@ The last disjunction can also be reduced to a **single equation** `0 = D`. Take 
 
 For binary pigeonhole, the parity lower bound also restricts the value of `D`. If a simplification-free derivation of the singleton has `s` lines, `l ≥ 32` and `4s+2 ≤ exp(2^l/(32768 l²))`, then `D` is even. An odd right-hand side would stay contradictory modulo two and yield a parity refutation with at most `4s+2` lines. A nonzero even right-hand side becomes zero modulo two, so this argument leaves that case open. [False-unit parity theorem](../lean/PEqualNP/Search/BPHPFalseUnitParity.lean)
 
+## A collision search inside one resolution inference
+
+Before reducing an equation modulo two, divide its coefficients **and its right-hand side** by their largest common power of two. Leave the zero equation at zero. Now every false constant projects to a contradiction, including `0 = D` for even nonzero `D`. Fix `l ≥ 32` and write `E = exp(2^l/(32768 l²))`. In any integer refutation with `s` lines satisfying `4s+1 ≤ E`, some resolution inference combines two equations whose normalized augmented rows are independent over the rationals and equal modulo two. They share an odd variable coefficient. Every two-column determinant is even and at least one is nonzero. A four-line derivation from the satisfiable one-variable formula `x=1` already exhibits this kind of cancellation. [Minor theorem](../lean/PEqualNP/Search/BPHPPrimitiveMinor.lean) · [Four-line example](../lean/PEqualNP/Search/PrimitiveCancellationExample.lean)
+
+An assignment witnesses the failure of such a projected inference when it satisfies both selected equations and falsifies the entire projected conclusion. The parity clause that excludes these witnesses can be derived from the pigeonhole axioms. If all these clauses had derivations of at most `B` lines, inserting them into the integer proof after projection would give a parity refutation of at most `(B+8)s+1` lines. Thus whenever `(B+8)s+1 ≤ E`, one resolution inference has a clause whose every parity derivation needs more than `B` lines. [Repair theorem](../lean/PEqualNP/Search/BPHPHardCancellation.lean)
+
+There is a search problem on the witnesses for that inference. Given a witness, use parity queries to identify two pigeons assigned the same hole and the hole they share. For each natural `r` with `(3r+10)s+1 ≤ E`, one inference has more than `r` distinct witnesses, and every adaptive parity decision tree solving this search on its witnesses needs more than `r` leaves. [Search theorem](../lean/PEqualNP/Search/BPHPCancellationSearch.lean)
+
+Choose any set of `k` pigeons and let `I` count the witnesses for the same inference that assign those pigeons distinct holes. Then `r < 2^(lk) + I`. In particular, whenever `2^(lk) ≤ r`, some witness avoids every collision internal to the chosen set. To prove the count, query the chosen pigeons first. A collision among them labels the leaf immediately. On the remaining leaves, distinguish just the exceptional witnesses, charging each at most once. What remains open is whether an integer DAG can produce such a hard inference in polynomial size. [Counting theorem](../lean/PEqualNP/Search/BPHPCancellationMultiplicity.lean) · [Exact witness statement](L-alg-006-cancellation-witnesses.lean.txt)
+
 ## Repeated use of a step that shortens a line
 
 For `l ≥ 17`, let `T = 2^(2^floor((l−17)/6))`. Fix a syntactic justification for each position in a refutation with `s` lines and encoded size `S`. Unfold the dependencies from a chosen occurrence of the empty line. For every natural number `M` with `4MsS < T+2`, one unary inference that shortens the list of equations appears more than `M` times in that tree. The original DAG can store this inference once. Width counts list entries, including duplicates. [Shrinking-line theorem](../lean/PEqualNP/Search/BPHPShrinkingLine.lean)
@@ -58,14 +68,20 @@ lake build +PEqualNP.Search.BPHPCubic +PEqualNP.Search.Helpers.BPHPMerge \
   +PEqualNP.Search.Helpers.ParityMiddleSlice +PEqualNP.Search.Helpers.ParitySeparation \
   +PEqualNP.Search.BPHPReusePath +PEqualNP.Search.BPHPShrinkingLine \
   +PEqualNP.Search.BPHPFalseUnit +PEqualNP.Search.BPHPFalseUnitParity \
-  +PEqualNP.Search.SingleUnitSimplification
+  +PEqualNP.Search.SingleUnitSimplification +PEqualNP.Search.BPHPPrimitiveMinor \
+  +PEqualNP.Search.PrimitiveCancellationExample +PEqualNP.Search.BPHPCancellationWitnesses \
+  +PEqualNP.Search.BPHPCancellationMultiplicity
 ```
 
-From the checkout root, the project's checker can also verify both normalization theorems against their recorded statements.
+From the checkout root, the project's checker can verify the following theorems against their recorded statements.
 
 ```sh
 node tools/check-lean.mjs lean/PEqualNP/Search/DeferredSimplification.lean \
   notes/L-alg-006-final-step.lean.txt check
 node tools/check-lean.mjs lean/PEqualNP/Search/SingleUnitSimplification.lean \
   notes/L-alg-006-final-unit.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BPHPPrimitiveMinor.lean \
+  notes/L-alg-006-parity-minor.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BPHPCancellationWitnesses.lean \
+  notes/L-alg-006-cancellation-witnesses.lean.txt check
 ```
