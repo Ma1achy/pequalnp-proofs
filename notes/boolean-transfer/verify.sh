@@ -22,7 +22,7 @@ build=$(mktemp -d)
 trap 'rm -rf "$build"' EXIT
 export LEAN_PATH="$build:$project_path"
 cd "$companion"
-for module in CircuitDAG BooleanIdeal Frobenius MinTerm PartialLayer SquaringCost CircuitTransfer TourLayer SourceBridge SparseRepeat EasyTourLayer CoverCost BallAgreement SurplusKernel ForcedTourWeight CircuitProjection LayerProjection SplicedTours SplicePermutation CoreCoefficient OrbitPadding ExactTourPadding TreewidthTransfer ArcWindow ArcRestrictions WindowCoefficients; do
+for module in CircuitDAG BooleanIdeal Frobenius MinTerm PartialLayer SquaringCost CircuitTransfer TourLayer SourceBridge SparseRepeat EasyTourLayer CoverCost BallAgreement SurplusKernel ForcedTourWeight CircuitProjection LayerProjection SplicedTours SplicePermutation CoreCoefficient OrbitPadding ExactTourPadding TreewidthTransfer ArcWindow ArcRestrictions WindowCoefficients OracleTransfer ParseGuard UniquePromise PromiseIdeal; do
   printf 'Checking %s\n' "$module.lean"
   "$lean" -DwarningAsError=true -o "$build/$module.olean" "$module.lean"
 done
@@ -42,3 +42,10 @@ python3 anf_cores.py
 python3 exact_tour_padding.py
 python3 boolean_treewidth.py
 python3 arc_window_search.py
+python3 oracle_transfer.py
+python3 guarded_parses.py
+python3 affine_transcripts.py
+python3 unique_tour_windows.py
+python3 promise_isolation.py
+python3 unique_verifier_gates.py
+python3 unique_tour_gadget.py
