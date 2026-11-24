@@ -1,0 +1,8 @@
+∀ k : ℕ, 1 ≤ k → ∀ p : Polynomial ℕ, ∃ l : ℕ,
+    ∀ π : List (PEqualNP.Search.QLine (Fin (2 ^ l + 1) × Fin l)),
+      PEqualNP.Search.IsResLinQSynRefutation (PEqualNP.ProofComplexity.BPHP (2 ^ l + 1) l) π →
+      (∀ L ∈ π, ∀ e ∈ L, ∃ (ask : List Bool → Finset (Fin (2 ^ l + 1) × Fin l))
+          (out : List Bool → Bool), ∀ a : (Fin (2 ^ l + 1) × Fin l) → Bool,
+          out ((List.range k).foldl (fun h _ =>
+            h ++ [decide (Odd (((ask h).filter (fun v => a v = true)).card))]) []) = true ↔
+          PEqualNP.Search.QEq.Holds a e) → p.eval (2 ^ l) < π.length

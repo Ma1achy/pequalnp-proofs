@@ -1,0 +1,5 @@
+∀ (l : ℕ) (π : List (PEqualNP.Search.QLine (Fin (2^l) × Fin l))) (e : PEqualNP.Search.QEq (Fin (2^l) × Fin l)),
+  PEqualNP.Search.IsResLinQSynDerivation (PEqualNP.ProofComplexity.BPHP (2^l) l) π →
+  [e] ∈ π → e.1 ≠ 0 →
+  ∃ ρ, PEqualNP.Search.IsResLinQSynRefutation (PEqualNP.ProofComplexity.BPHP (2^l+1) l) ρ ∧
+    PEqualNP.Search.resLinQSize ρ ≤ 42*(2^l)^2*PEqualNP.Search.resLinQSize π + 1200*(2^l+1)^5

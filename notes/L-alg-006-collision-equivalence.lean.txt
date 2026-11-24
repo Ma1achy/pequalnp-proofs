@@ -1,0 +1,11 @@
+let G := fun (l : ℕ) =>
+  ((Finset.univ : Finset (Fin (2^l+1) × Fin (2^l+1))).filter (fun z => z.1 ≠ z.2)).toList.map
+    (fun z => ((fun v : Fin (2^l+1) × Fin l =>
+      (if v.1 = z.1 then (2 : ℤ)^v.2.val else 0) -
+      (if v.1 = z.2 then (2 : ℤ)^v.2.val else 0)), (0 : ℤ)))
+(∀ l a, PEqualNP.Search.QLine.Holds a (G l)) ∧
+((∀ p : Polynomial ℕ, ∃ l : ℕ, ∀ π : List (PEqualNP.Search.QLine (Fin (2^l+1) × Fin l)),
+  PEqualNP.Search.IsResLinQSynRefutation (PEqualNP.ProofComplexity.BPHP (2^l+1) l) π →
+    p.eval (2^l) < PEqualNP.Search.resLinQSize π) ↔
+ (∀ p : Polynomial ℕ, ∃ l : ℕ, 0 < l ∧ ∀ ρ : List (PEqualNP.Search.QLine (Fin (2^l+1) × Fin l)),
+  PEqualNP.Search.IsResLinQSynDerivation ∅ ρ → G l ∈ ρ → p.eval (2^l) < PEqualNP.Search.resLinQSize ρ))

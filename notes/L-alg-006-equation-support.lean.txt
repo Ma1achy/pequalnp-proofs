@@ -1,0 +1,5 @@
+∀ k : ℕ, 1 ≤ k → ∀ p : Polynomial ℕ, ∃ l : ℕ,
+  ∀ π : List (PEqualNP.Search.QLine (Fin (2 ^ l + 1) × Fin l)),
+    PEqualNP.Search.IsResLinQSynRefutation (PEqualNP.ProofComplexity.BPHP (2 ^ l + 1) l) π →
+    (∀ L ∈ π, ∀ e ∈ L, (Finset.univ.filter (fun v => e.1 v ≠ 0)).card ≤ k) →
+    p.eval (2 ^ l) < π.length

@@ -1,0 +1,4 @@
+∀ k l : ℕ, 8*(512*k+1) ≤ l →
+  ∃ π : List (PEqualNP.Search.QLine (Fin (2^l+1) × Fin l)),
+    PEqualNP.Search.IsResLinQSynRefutation (PEqualNP.ProofComplexity.BPHP (2^l+1) l) π ∧
+    PEqualNP.Search.resLinQSize π ^ k ≤ 2^(2^l)

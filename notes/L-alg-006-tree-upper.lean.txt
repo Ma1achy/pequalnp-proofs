@@ -1,0 +1,7 @@
+∀ l : ℕ,
+  let n := 2 ^ l
+  let d := 2 * (n - 1) + l
+  ∃ π : List (PEqualNP.Search.QLine (Fin (n + 1) × Fin l)),
+    PEqualNP.Search.IsResLinQSynRefutation (PEqualNP.ProofComplexity.BPHP (n + 1) l) π ∧
+    PEqualNP.Search.resLinQSize π ≤ 12 * (4*d + 1) * 2^d ∧
+    PEqualNP.Search.resLinQSize π ≤ 36 * n^2 * 4^n

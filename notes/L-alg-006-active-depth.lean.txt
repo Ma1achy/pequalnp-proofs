@@ -1,0 +1,18 @@
+∀ (p : Polynomial ℕ) (N : ℕ), ∃ t : ℕ, N ≤ t ∧
+  let l := 2 ^ t
+  let k := l / (2 * (t + 5))
+  let V := Fin (2 ^ l + 1) × Fin l
+  ∀ π : List (PEqualNP.Search.QLine V),
+    let site : PEqualNP.Search.QEq V → PEqualNP.Search.QEq V → PEqualNP.Search.QEq V → Prop :=
+      fun u v w => ∃ (front tail : List (PEqualNP.Search.QLine V))
+        (C D : PEqualNP.Search.QLine V) (α β : ℤ),
+        π = front ++ ((w :: (C ++ D)) :: tail) ∧ (u :: C) ∈ tail ∧ (v :: D) ∈ tail ∧
+        w = (α • u.1 + β • v.1, α * u.2 + β * v.2)
+    PEqualNP.Search.IsResLinQSynRefutation (PEqualNP.ProofComplexity.BPHP (2 ^ l + 1) l) π →
+    π.length ≤ p.eval (2 ^ l) →
+    ∃ e : PEqualNP.Search.QEq V,
+      (∃ u v, site u v e) ∧ (∃ u v w, site u v w ∧ (u = e ∨ v = e)) ∧
+      ¬ ∃ (ask : List Bool → Finset V) (out : List Bool → Bool), ∀ a : V → Bool,
+        out ((List.range k).foldl (fun h _ =>
+          h ++ [decide (Odd (((ask h).filter (fun v => a v = true)).card))]) []) = true ↔
+            PEqualNP.Search.QEq.Holds a e
