@@ -1,0 +1,7 @@
+∀ l : ℕ, 0 < l →
+  let G := ((Finset.univ : Finset (Fin (2^l+1) × Fin (2^l+1))).filter (fun z => z.1 ≠ z.2)).toList.map
+    (fun z => ((fun v : Fin (2^l+1) × Fin l =>
+      (if v.1 = z.1 then (2 : ℤ)^v.2.val else 0) -
+      (if v.1 = z.2 then (2 : ℤ)^v.2.val else 0)), (0 : ℤ)))
+  ∃ ρ : List (PEqualNP.Search.QLine (Fin (2^l+1) × Fin l)), PEqualNP.Search.IsResLinQSynDerivation ∅ ρ ∧ G ∈ ρ ∧
+    PEqualNP.Search.resLinQSize ρ ≤ 2^(522*(l+2)*2^((l+1)/2))

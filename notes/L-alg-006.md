@@ -4,11 +4,21 @@ Write `n = 2^l` for the number of holes. The posted conjecture asks whether, for
 
 ## Explicit refutations for every bit width
 
+The best upper bound obtained here is **`2^O(√n log n)`** for unrestricted DAG-like syntactic integer resolution. More precisely, if `n=2^l`, every width admits a refutation of encoded size at most `2^(512(l+2) · 2^ceil(l/2))`. For every positive integer `k` there is a width threshold beyond which this construction has size at most `2^(n/k)`. This rules out a lower bound of `2^(c n)` holding at all sufficiently large widths for any fixed `c>0`. A superpolynomial lower bound in `n` remains possible. [Refutation](../lean/PEqualNP/Search/BPHPBlockUpper.lean) · [Quantified subexponential bound](../lean/PEqualNP/Search/BPHPSubexponential.lean)
+
+Split each label into a prefix and a suffix with lengths differing by at most one. A prefix identifies a block of `b` holes. For each vector of counts `t`, with one allowance from `0` to `b` per block, prove that the first `1+∑t` pigeons overload some block. One disjunct witnesses overload by naming `t+1` rows in that block. Their total Hamming distance from its prefix is zero exactly when all those rows match. This is one integer equation in the original bit variables. On reading a new row, the proof can reuse the state with an allowance one lower in that row's block. In the final state, `b+1` rows with the same prefix have only `b` suffixes. Testing the bits of those rows produces a violated collision clause. [State representation](../lean/PEqualNP/Search/Helpers/BlockCapacityState.lean) · [Transition](../lean/PEqualNP/Search/BPHPBlockStep.lean) · [Final state](../lean/PEqualNP/Search/Helpers/BlockCapacityTerminal.lean)
+
+There are `(b+1)^(n/b)` count vectors. The encoded cost per transition, and the cost of discharging the final state, are each at most `(n+2)^(64(b+1))`. Choosing about `√n` holes per block balances these costs. The explicit construction still enumerates a superpolynomial number of count vectors. [Cost bound](../lean/PEqualNP/Search/Helpers/BlockBudget.lean) · [Rate](../lean/PEqualNP/Search/Helpers/BPHPBlockRate.lean) · [Little-o estimate](../lean/PEqualNP/Search/Helpers/BlockLittleO.lean)
+
+At every positive width the one-line disjunction of all pairwise collisions also has an integer derivation from the Boolean axioms alone of size at most `2^(522(l+2) · 2^ceil(l/2))`. This transfers the bound to the equivalent version of L-alg-006. [Boolean-axiom proof](../lean/PEqualNP/Search/CollisionSubexponential.lean)
+
+### Earlier constructions
+
 There is a DAG-like syntactic integer refutation of encoded size at most **`1000(n+1)¹⁰ 2ⁿ`** for every `n = 2^l`. For each subset `H` of the holes, derive the line saying that at least one of the first `|H|+1` pigeons lies outside `H`. Read the last of those pigeons. If its label is outside `H`, it witnesses the line. If its label is `h ∈ H`, reuse the previously derived line for `H` with `h` removed. A collision clause prevents an earlier pigeon from taking `h`. There are `2ⁿ` subsets, and each transition costs at most `1000(n+1)¹⁰`. Taking `H` to be all holes gives the empty line. The exponential number of states leaves the polynomial-size question open. [Checked construction](../lean/PEqualNP/Search/BPHPDagUpper.lean) · [State transition](../lean/PEqualNP/Search/BPHPSubsetStep.lean) · [Recorded statement](L-alg-006-dag-upper.lean.txt)
 
 Permuting bit positions and flipping chosen bits give `n l!` relabelings of the holes. Covering this construction's subset states by the images of `R` representatives requires `R n l! ≥ 2ⁿ`. For `l ≥ 5` this leaves at least `2^(n/2)` representatives. Constant-row assignments distinguish the Boolean functions of any two different subsets. This counts states in the subset construction. [Symmetry bound](../lean/PEqualNP/Search/BPHPSubsetSymmetry.lean)
 
-A coordinate search gives a refutation of encoded size at most **`36 n² 4ⁿ`**. Query the first bit of `n+1` pigeons. At least `n/2+1` of them share that bit. Keep that many pigeons and repeat on their remaining bits. A branch of this search inspects at most `2(n−1)+l` bits before it identifies a pair of equal labels and the violated input clause. Compiling the search tree uses integer resolution, Boolean axioms, weakening and simplification. At width zero the input already contains the empty clause. [Checked construction](../lean/PEqualNP/Search/BPHPTreeUpper.lean) · [Recorded statement](L-alg-006-tree-upper.lean.txt)
+A coordinate search gives a refutation of encoded size at most **`36 n² 4ⁿ`**. Query the first bit of `n+1` pigeons. At least `n/2+1` of them share that bit. Keep that many pigeons and repeat on their remaining bits. A branch of this search inspects at most `2(n−1)+l` bits before it identifies a pair of equal labels and the violated input clause. Compiling the search tree uses integer resolution, Boolean axioms, weakening and simplification. At width zero the input already contains the empty clause. Dantchev, Galesi and Martin give the majority-split tree argument for binary resolution. [Dantchev et al., Theorem 5](https://arxiv.org/abs/1809.02843) · [Checked construction](../lean/PEqualNP/Search/BPHPTreeUpper.lean) · [Recorded statement](L-alg-006-tree-upper.lean.txt)
 
 ## A single balanced equation would suffice
 
@@ -116,7 +126,9 @@ lake build +PEqualNP.Search.BPHPCubic +PEqualNP.Search.Helpers.BPHPMerge \
   +PEqualNP.Search.BalancedUnitRefutation +PEqualNP.Search.BalancedOccupancyEquivalence \
   +PEqualNP.Search.BPHPTriangleLine +PEqualNP.Search.Helpers.QTriangleCover \
   +PEqualNP.Search.BPHPOccupancyCertificate +PEqualNP.Search.BPHPTreeUpper \
-  +PEqualNP.Search.BPHPDagUpper +PEqualNP.Search.BPHPSubsetSymmetry
+  +PEqualNP.Search.BPHPDagUpper +PEqualNP.Search.BPHPSubsetSymmetry \
+  +PEqualNP.Search.BPHPBlockUpper +PEqualNP.Search.BPHPSubexponential \
+  +PEqualNP.Search.CollisionSubexponential +PEqualNP.Search.Helpers.BlockLittleO
 ```
 
 From the checkout root, the project's checker can verify the following theorems against their recorded statements.
@@ -152,4 +164,10 @@ node tools/check-lean.mjs lean/PEqualNP/Search/BPHPDagUpper.lean \
   notes/L-alg-006-dag-upper.lean.txt check
 node tools/check-lean.mjs lean/PEqualNP/Search/BPHPSubsetSymmetry.lean \
   notes/L-alg-006-subset-symmetry.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BPHPBlockUpper.lean \
+  notes/L-alg-006-block-upper.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/BPHPSubexponential.lean \
+  notes/L-alg-006-subexponential.lean.txt check
+node tools/check-lean.mjs lean/PEqualNP/Search/CollisionSubexponential.lean \
+  notes/L-alg-006-collision-subexponential.lean.txt check
 ```
