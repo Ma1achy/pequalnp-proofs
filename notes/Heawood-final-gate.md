@@ -23,6 +23,15 @@ python3 tools/heawood_final_orbits.py
 python3 tools/heawood_final_orbits.py --certificate > /tmp/heawood-orbits.json
 ```
 
+The SAT generator encodes one representative at a time. Its 26-gate instance for the first OR pair uses 6,741 variables and 199,092 clauses. A 60-second CaDiCaL run returned unknown. The 27-gate star circuit, pinned as a control, passed the SAT constraints, and a separate evaluator checked its answers on all 16,384 assignments. [Search generator](../tools/heawood_final_search.py)
+
+```sh
+python3 tools/heawood_final_search.py --control
+python3 tools/heawood_final_search.py --op or --orbit 0 --gates 26 --seconds 60
+```
+
+These commands use the CaDiCaL executable on the path. The option `--solver` accepts an explicit executable path.
+
 ## An additional constraint on the remaining search
 
 Lean also proves that any 26-gate witness must have some raw input read by exactly one gate among those that affect the output. The other operand of that gate must be a wire from an earlier gate. For an AND reader, that earlier wire must accept all three neighboring singleton assignments. For an OR reader, it must reject the other thirteen singleton assignments and all sixty independent pairs among those vertices. These conditions apply to circuits that share intermediate results. [Necessary input reads](../lean/PEqualNP/Search/HeawoodNecessaryReads.lean)
