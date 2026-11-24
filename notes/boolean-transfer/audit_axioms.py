@@ -71,7 +71,9 @@ def strict_prints(modules, names, work):
         raise ValueError(f"Lean audit failed\n{response.stdout}{response.stderr}")
     remaining = set(names)
     seen_axioms = set()
-    for line in response.stdout.splitlines():
+    # Lean may wrap an axiom list after a comma for a long declaration name.
+    output = re.sub(r",\n[ \t]+", ", ", response.stdout)
+    for line in output.splitlines():
         result = REPORT.fullmatch(line)
         if not result or result[1] not in remaining:
             raise ValueError(f"unexpected or duplicate Lean output: {line}")

@@ -22,7 +22,7 @@ build=$(mktemp -d)
 trap 'rm -rf "$build"' EXIT
 export LEAN_PATH="$build:$project_path"
 cd "$companion"
-for module in CircuitDAG BooleanIdeal Frobenius MinTerm PartialLayer SquaringCost CircuitTransfer TourLayer SourceBridge SparseRepeat EasyTourLayer CoverCost BallAgreement SurplusKernel ForcedTourWeight; do
+for module in CircuitDAG BooleanIdeal Frobenius MinTerm PartialLayer SquaringCost CircuitTransfer TourLayer SourceBridge SparseRepeat EasyTourLayer CoverCost BallAgreement SurplusKernel ForcedTourWeight CircuitProjection LayerProjection SplicedTours SplicePermutation CoreCoefficient OrbitPadding; do
   printf 'Checking %s\n' "$module.lean"
   "$lean" -DwarningAsError=true -o "$build/$module.olean" "$module.lean"
 done
@@ -36,3 +36,6 @@ python3 sparse_repeats.py
 python3 degree_checks.py
 python3 sparse_tour.py
 python3 surplus_kernel.py
+python3 check_layer_projection.py
+python3 check_orbit_padding.py
+python3 anf_cores.py
