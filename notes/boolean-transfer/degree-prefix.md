@@ -5,7 +5,7 @@ Consider the canonical multilinear polynomial over $\mathbb F_2$ of the decision
 * For every fixed nonnegative integer $C$, there is a deterministic logspace language matching the entire prefix through $m+C\lfloor\log_2m\rfloor$ at every $m\ge2$.
 * For every fixed real $\delta>0$, a polynomial-time language matching the entire prefix through $m+\lfloor m^\delta\rfloor$ at all sufficiently large $m$ exists **if and only if P = NP**. With polynomial-size nonuniform circuits in place of polynomial time, the corresponding condition is $\mathrm{NP}\subseteq\mathrm{P/poly}$.
 
-The polynomial-width condition is an equivalence. We prove neither existence nor nonexistence of such an algorithm. The argument leaves intermediate widths, such as $(\log m)^2$, unresolved.
+The polynomial-width condition is an equivalence. We prove neither existence nor nonexistence of such an algorithm. A [follow-up](surplus-kernel.md) characterizes the log-squared case by a square-root-exponential Hamiltonicity algorithm. Positive-rate ETH rules out every eventually superlogarithmic width for uniform polynomial-time languages. [ETH proof](prefix-eth-sources.md)
 
 ## The prefix records a sparse-input decision problem
 
